@@ -51,3 +51,6 @@ Join our community of developers creating universal apps.
 
 Senior Capstone Project! A "buddy" application targeted towards children suffering from autism.
 
+To run:
+cd into backend: npx nodemon server.js
+cd into frontend: npm start
