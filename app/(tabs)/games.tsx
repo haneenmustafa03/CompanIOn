@@ -1,12 +1,9 @@
 import { ImageBackground, StyleSheet } from 'react-native';
 
-
-const PlaceholderImage = require('@/assets/images/background-image.png');
-
-export default function Index() {
+export default function GamesScreen() {
   return (
     <ImageBackground 
-      source={require('../../assets/backgroundImages/Home.png')} 
+      source={require('../../assets/backgroundImages/Kitchen.png')} 
       style={styles.container}
       resizeMode="stretch"
     >
@@ -18,14 +15,16 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#25292e',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundSize: 'contain',
     backgroundPosition: 'center',
     width: '105%',
     height: '100%',
   },
-  imageContainer: {
-    flex: 1,
+  text: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
