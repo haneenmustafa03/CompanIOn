@@ -6,43 +6,21 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 export default function TabLayout() {
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#ffd33d',
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: '#fff',
         tabBarInactiveTintColor: '#fff',
-        tabBarShowLabel:false,
         headerShown: false,
         tabBarStyle: {
-          position: 'absolute',
-          backgroundColor: 'rgba(129, 129, 129, 0.41)',
-          borderRadius: 20,
-          right: 100,
-          left: 100,
-          bottom: 20,
-        //   left: 100,
-        //   right: 100,
-        // //   height: 40,
-        //   borderRadius: 20,
-        //   backgroundColor: 'rgba(129, 129, 129, 0.41)',
-        //   borderTopWidth: 0,
-        //   elevation: 5,
-        //   shadowColor: '#000',
-        //   shadowOffset: { width: 0, height: 2 },
-        //   shadowOpacity: 0.5,
-        //   shadowRadius: 3.84,
-        //   padding: 10,
+          backgroundColor:
+            route.name === 'games' ? '#2D62A6' :
+            route.name === 'about' ? '#508943' :
+            route.name === 'badges' ? '#be814b' :
+            route.name === 'settings' ? '#2E7D32' :
+            '#E9940C',
+          height: 55,
+          borderTopWidth: 0,
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: '#fff',
-        },
-        tabBarIconStyle: {
-          color: '#fff',
-          fontSize: 40,
-        },
-      }}
+      })}
     >
       <Tabs.Screen
         name="index"

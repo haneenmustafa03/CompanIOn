@@ -1,4 +1,4 @@
-import { ImageBackground, StyleSheet } from 'react-native';
+import { Image, ImageBackground, StyleSheet } from 'react-native';
 
 
 const PlaceholderImage = require('@/assets/images/background-image.png');
@@ -10,7 +10,7 @@ export default function Index() {
       style={styles.container}
       resizeMode="stretch"
     >
-      {/* <Text style={styles.text}>Games screen</Text> */}
+      <Image source={require('../../assets/UIElements/microphone.png')} style={styles.image} />
     </ImageBackground>
   );
 }
@@ -27,5 +27,11 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     flex: 1,
+  },
+  image: {
+    width: 140,
+    height: 140,
+    position: 'absolute',
+    bottom: 10,
   },
 });
