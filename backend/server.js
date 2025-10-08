@@ -7,12 +7,11 @@ import { fileURLToPath } from 'url';
 
 //Routes
 import authRoutes from './routes/auth.js';
-import lessonRoutes from './routes/lessons.js';
+//import lessonRoutes from './routes/lessons.js';
 import gameRoutes from './routes/games.js';
 import badgeRoutes from './routes/badges.js';
-import parentRoutes from './routes/parent.js';
-import settingsRoutes from './routes/settings.js';
-import chatRoutes from './routes/chat.js';
+//import parentRoutes from './routes/parent.js';
+//import settingsRoutes from './routes/settings.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -50,11 +49,10 @@ app.get("/", (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-app.use('/api/lessons', lessonRoutes);
+//app.use('/api/lessons', lessonRoutes);
 app.use('/api/games', gameRoutes);
-app.use('/api/parent', parentRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/chat', chatRoutes);
+//app.use('/api/parent', parentRoutes);
+//app.use('/api/settings', settingsRoutes);
 
 
 
