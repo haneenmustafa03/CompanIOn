@@ -1,7 +1,7 @@
-import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -32,36 +32,17 @@ app.use(express.urlencoded({ extended: true }))
 async function connectDB() {
     try {
         await mongoose.connect(db, {
-            serverSelectionTimeoutMS: 7000,
+
         });
-        isDatabaseConnected = true;
         console.log("MongoDB connected");
     }
     catch (error) {
-        isDatabaseConnected = false;
-        console.error("Error connecting to database:", error?.message || error);
-        console.error("The server will continue running without a database connection.");
+        console.log("Error connecting to database", error);
+        process.exit(1);
     }
 }
 
-// Connection state logging
-mongoose.connection.on('connected', () => {
-    isDatabaseConnected = true;
-    console.log('Mongoose connection established');
-});
-
-mongoose.connection.on('error', (err) => {
-    isDatabaseConnected = false;
-    console.error('Mongoose connection error:', err?.message || err);
-});
-
-mongoose.connection.on('disconnected', () => {
-    isDatabaseConnected = false;
-    console.warn('Mongoose disconnected');
-});
-
-// Try to connect, but do not block server start
-tryConnectToDatabase();
+connectDB();
 
 app.get("/", (req, res) => {
     res.json({ message: 'companIOn API running'});
@@ -87,5 +68,4 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log("Server is running on port 5001");
-  console.log(`Server is running on port ${PORT}`);
 });
