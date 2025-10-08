@@ -139,3 +139,5 @@ router.get('/stats/all', authenticate, async (req, res) => {
 });
 
 export default router;
+
+/* lists all games in /GET, gets specific games and stats, records when the game is finished, returns overall game stats will also award a badge if milestone is acheived*/

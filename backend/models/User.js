@@ -131,3 +131,6 @@ userSchema.methods.toJSON = function() {
 const User = mongoose.model('User', userSchema);
 
 export default User;
+
+/* This file stores user accts (separate parent and child accts and links them via email, 
+sets up some default settings (notifs, max time allowed), progress tracking in games and lessons*/

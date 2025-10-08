@@ -172,3 +172,4 @@ router.get('/me', async (req, res) => {
 
 export default router;
 
+/* Registration, logging in and verifies who is logged in currently, this will auto link child and parent accts if they have the same email  */
