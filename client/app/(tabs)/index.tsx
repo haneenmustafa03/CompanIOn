@@ -1,7 +1,5 @@
-import { Image, ImageBackground, StyleSheet } from 'react-native';
-
-
-const PlaceholderImage = require('@/assets/images/background-image.png');
+import { ResizeMode, Video } from 'expo-av';
+import { Image, ImageBackground, StyleSheet, View } from 'react-native';
 
 export default function Index() {
   return (
@@ -10,6 +8,17 @@ export default function Index() {
       style={styles.container}
       resizeMode="stretch"
     >
+      <View style={styles.animationContainer}>
+        <Video
+          // source={require('../../assets/animations/robotAnimation.mp4')}
+          style={styles.robotAnimation}
+          resizeMode={ResizeMode.CONTAIN}
+          shouldPlay
+          isLooping
+          isMuted
+        />
+      </View>
+      
       <Image source={require('../../assets/UIElements/microphone.png')} style={styles.image} />
     </ImageBackground>
   );
@@ -24,6 +33,17 @@ const styles = StyleSheet.create({
     backgroundPosition: 'center',
     width: '105%',
     height: '100%',
+  },
+  animationContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '60%',
+  },
+  robotAnimation: {
+    width: 300,
+    height: 300,
   },
   imageContainer: {
     flex: 1,
