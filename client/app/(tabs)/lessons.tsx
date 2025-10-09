@@ -1,31 +1,33 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const API_BASE_URL = 'http://localhost:5001/api';
 
-interface Game {
+interface Lesson {
   id: string;
   name: string;
   description: string;
   skills: string[];
   difficulty: string;
+  duration: number;
+  category: string;
 }
 
-export default function GamesScreen() {
-  const [games, setGames] = useState<Game[]>([]);
+export default function LessonsScreen() {
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchGames();
+    fetchLessons();
   }, []);
 
-  const fetchGames = async () => {
+  const fetchLessons = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/games`, {
+      const response = await fetch(`${API_BASE_URL}/lessons`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -39,36 +41,42 @@ export default function GamesScreen() {
       const data = await response.json();
       
       if (data.success) {
-        setGames(data.games);
+        setLessons(data.lessons);
       } else {
-        throw new Error(data.message || 'Failed to fetch games');
+        throw new Error(data.message || 'Failed to fetch lessons');
       }
     } catch (err) {
-      console.error('Error fetching games:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load games');
+      console.error('Error fetching lessons:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load lessons');
       
       // Fallback to mock data if API fails
-      setGames([
+      setLessons([
         {
-          id: 'checkers',
-          name: 'Checkers',
-          description: 'Play checkers and practice thinking ahead',
-          skills: ['Strategy', 'Planning', 'Turn-taking'],
-          difficulty: 'Medium'
+          id: 'alphabet',
+          name: 'Alphabet Learning',
+          description: 'Learn the alphabet with fun activities',
+          skills: ['Reading', 'Letter Recognition', 'Phonics'],
+          difficulty: 'Easy',
+          duration: 15,
+          category: 'Language'
         },
         {
-          id: 'matching',
-          name: 'Matching Game',
-          description: 'Match pairs of cards to practice memory',
-          skills: ['Memory', 'Concentration', 'Pattern recognition'],
-          difficulty: 'Easy'
+          id: 'numbers',
+          name: 'Number Counting',
+          description: 'Master counting from 1 to 20',
+          skills: ['Math', 'Counting', 'Number Recognition'],
+          difficulty: 'Easy',
+          duration: 20,
+          category: 'Math'
         },
         {
-          id: 'storyteller',
-          name: 'Story Teller',
-          description: 'Create stories and practice creativity',
-          skills: ['Creativity', 'Language', 'Sequencing'],
-          difficulty: 'Easy'
+          id: 'colors',
+          name: 'Color Recognition',
+          description: 'Learn colors through interactive games',
+          skills: ['Visual Learning', 'Color Theory', 'Memory'],
+          difficulty: 'Easy',
+          duration: 10,
+          category: 'Art'
         }
       ]);
     } finally {
@@ -76,14 +84,14 @@ export default function GamesScreen() {
     }
   };
 
-  const handleGamePress = (game: Game) => {
-    console.log('Game pressed:', game.name);
-    // TODO: Navigate to game or show game details
+  const handleLessonPress = (lesson: Lesson) => {
+    console.log('Lesson pressed:', lesson.name);
+    // TODO: Navigate to lesson or show lesson details
   };
 
-  const completeGame = async (gameId: string, score?: number, duration?: number) => {
+  const completeLesson = async (lessonId: string, score?: number, timeSpent?: number) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/games/${gameId}/complete`, {
+      const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,38 +99,38 @@ export default function GamesScreen() {
         },
         body: JSON.stringify({
           score: score || 100,
-          duration: duration || 300 // 5 minutes default
+          timeSpent: timeSpent || 15
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Game completed:', data);
-        // TODO: Show success message and any new badges earned
+        console.log('Lesson completed:', data);
+        // TODO: Show success message
       }
     } catch (error) {
-      console.error('Error completing game:', error);
+      console.error('Error completing lesson:', error);
     }
   };
 
   return (
     <ImageBackground 
-      source={require('../../assets/backgroundImages/Games.png')} 
+      source={require('../../assets/backgroundImages/Library.png')} 
       style={styles.container}
       resizeMode="stretch"
     >
       <View style={styles.scrollerWrapper}>
-        <Text style={styles.sectionTitle}>Games: </Text>
+        <Text style={styles.sectionTitle}>Lessons: </Text>
         
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#fff" />
-            <Text style={styles.loadingText}>Loading games...</Text>
+            <Text style={styles.loadingText}>Loading lessons...</Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>⚠️ {error}</Text>
-            <Text style={styles.fallbackText}>Showing offline games</Text>
+            <Text style={styles.fallbackText}>Showing offline lessons</Text>
           </View>
         ) : null}
         
@@ -131,20 +139,23 @@ export default function GamesScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {games.map((game) => (
+          {lessons.map((lesson) => (
             <TouchableOpacity 
-              key={game.id} 
+              key={lesson.id} 
               style={styles.card}
-              onPress={() => handleGamePress(game)}
+              onPress={() => handleLessonPress(lesson)}
               activeOpacity={0.7}
             >
-              <Text style={styles.gameName}>{game.name}</Text>
-              <Text style={styles.gameDifficulty}>{game.difficulty}</Text>
-              <Text style={styles.gameDescription} numberOfLines={2}>
-                {game.description}
-              </Text>
+              <Image
+                source={require('../../assets/images/library/blueBook.png')}
+                style={styles.cardImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.lessonName}>{lesson.name}</Text>
+              <Text style={styles.lessonDifficulty}>{lesson.difficulty}</Text>
+              <Text style={styles.lessonDuration}>{lesson.duration} min</Text>
               <View style={styles.skillsContainer}>
-                {game.skills.slice(0, 2).map((skill, index) => (
+                {lesson.skills.slice(0, 2).map((skill, index) => (
                   <Text key={index} style={styles.skillTag}>
                     {skill}
                   </Text>
@@ -159,23 +170,9 @@ export default function GamesScreen() {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    width: 160,
-    height: 140,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    padding: 8,
-    marginRight: 8,
-    marginLeft: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundSize: 'contain',
-    backgroundPosition: 'center',
     width: '100%',
     height: '100%',
   },
@@ -198,26 +195,42 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  gameName: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 2,
-    textAlign: 'center',
+  card: {
+    width: 160,
+    height: 180,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    padding: 8,
+    marginRight: 8,
+    marginLeft: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
   },
-  gameDifficulty: {
+  cardImage: {
+    width: 60,
+    height: 60,
+    marginBottom: 8,
+  },
+  lessonName: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  lessonDifficulty: {
     color: '#FFD700',
     fontSize: 10,
     fontWeight: '600',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  gameDescription: {
-    color: '#fff',
-    fontSize: 10,
+  lessonDuration: {
+    color: '#87CEEB',
+    fontSize: 9,
     textAlign: 'center',
     marginBottom: 6,
-    opacity: 0.9,
   },
   skillsContainer: {
     flexDirection: 'row',
@@ -227,11 +240,11 @@ const styles = StyleSheet.create({
   },
   skillTag: {
     color: '#87CEEB',
-    fontSize: 8,
+    fontSize: 7,
     backgroundColor: 'rgba(135, 206, 235, 0.2)',
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
     paddingVertical: 1,
-    borderRadius: 4,
+    borderRadius: 3,
     marginRight: 2,
     marginBottom: 2,
   },
@@ -258,10 +271,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     opacity: 0.7,
-  },
-  text: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
   },
 });

@@ -1,15 +1,14 @@
-import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 //Routes
 import authRoutes from './routes/auth.js';
-//import lessonRoutes from './routes/lessons.js';
 import gameRoutes from './routes/games.js';
-import badgeRoutes from './routes/badges.js';
+import lessonRoutes from './routes/lessons.js';
 //import parentRoutes from './routes/parent.js';
 //import settingsRoutes from './routes/settings.js';
 
@@ -49,7 +48,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
-//app.use('/api/lessons', lessonRoutes);
+app.use('/api/lessons', lessonRoutes);
 app.use('/api/games', gameRoutes);
 //app.use('/api/parent', parentRoutes);
 //app.use('/api/settings', settingsRoutes);

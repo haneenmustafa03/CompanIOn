@@ -1,30 +1,34 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, StyleSheet, Text } from "react-native";
 
 export default function SettingsScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Settings screen</Text>
-    </View>
+    <ImageBackground 
+      source={require('../../assets/backgroundImages/Settings.png')} 
+      style={styles.container}
+      resizeMode="stretch"
+    >
+      <Text style={styles.text}>Settings</Text>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-
-
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: "center",
+    // alignItems: "center",
     // backgroundImage: require('../../assets/images/background.png'),
-    backgroundColor: '#25292e',
+    backgroundColor: "#25292e",
+    backgroundSize: 'contain',
+    backgroundPosition: 'center',
+    width: '100%',
+    height: '100%',
   },
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: '#25292e',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  // },
-  // text: {
-  //   color: '#fff',
-  // },
+  text: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginLeft: 10,
+  },
 });

@@ -1,6 +1,6 @@
 import express from 'express';
-import User from '../models/User.js';
 import { authenticate, isChild } from '../middleware/auth.js';
+import User from '../models/User.js';
 import { checkAndAwardBadges } from './badges.js';
 
 const router = express.Router();
@@ -30,7 +30,7 @@ const GAMES = {
   }
 };
 
-router.get('/', authenticate, (req, res) => {
+router.get('/', (req, res) => {
   res.json({
     success: true,
     games: Object.values(GAMES)
