@@ -1,5 +1,6 @@
 import { ResizeMode, Video } from 'expo-av';
 import { Image, ImageBackground, StyleSheet, View } from 'react-native';
+import SmallRobot from '../../components/smallRobot';
 
 export default function Index() {
   return (
@@ -11,13 +12,15 @@ export default function Index() {
       <View style={styles.animationContainer}>
         <Video
           // source={require('../../assets/animations/robotAnimation.mp4')}
-          style={styles.robotAnimation}
+          // style={styles.robotAnimation}
           resizeMode={ResizeMode.CONTAIN}
           shouldPlay
           isLooping
           isMuted
         />
       </View>
+
+      <SmallRobot />  
       
       <Image source={require('../../assets/UIElements/microphone.png')} style={styles.image} />
     </ImageBackground>
