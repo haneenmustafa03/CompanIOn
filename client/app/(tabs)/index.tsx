@@ -20,7 +20,8 @@ export default function Index() {
         />
       </View>
 
-      <SmallRobot />  
+      <SmallRobot size={2} />  
+      
       
       <Image source={require('../../assets/UIElements/microphone.png')} style={styles.image} />
     </ImageBackground>

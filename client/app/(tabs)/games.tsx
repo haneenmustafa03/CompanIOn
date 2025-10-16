@@ -1,3 +1,4 @@
+import SmallRobot from '@/components/smallRobot';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -111,6 +112,13 @@ export default function GamesScreen() {
       style={styles.container}
       resizeMode="stretch"
     >
+
+
+      <View style={styles.robotWrapper}>  
+        <SmallRobot size={1.2} />  
+      </View>
+      
+      
       <View style={styles.scrollerWrapper}>
         <Text style={styles.sectionTitle}>Games: </Text>
         
@@ -263,5 +271,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  robotWrapper: {
+    position: 'absolute',
+    top: 160,
+    left: 80,
+    width: 100,
+    height: 150,
   },
 });

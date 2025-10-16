@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+import SmallRobot from '../../components/smallRobot';
 const API_BASE_URL = 'http://localhost:5001/api';
 
 interface Lesson {
@@ -119,6 +119,11 @@ export default function LessonsScreen() {
       style={styles.container}
       resizeMode="stretch"
     >
+
+      <View style={styles.robotWrapper}>
+        <SmallRobot size={1.2} />  
+      </View>
+      
       <View style={styles.scrollerWrapper}>
         <Text style={styles.sectionTitle}>Lessons: </Text>
         
@@ -272,4 +277,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     opacity: 0.7,
   },
+  robotWrapper: {
+    position: 'absolute',
+    top: 140,
+    right: 50,
+    width: 100,
+    height: 150,
+  },
+  
 });
