@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SmallRobot from '../../components/smallRobot';
@@ -86,7 +87,7 @@ export default function LessonsScreen() {
 
   const handleLessonPress = (lesson: Lesson) => {
     console.log('Lesson pressed:', lesson.name);
-    // TODO: Navigate to lesson or show lesson details
+    router.push(`/(tabs)/lesson?lessonId=${lesson.id}`);
   };
 
   const completeLesson = async (lessonId: string, score?: number, timeSpent?: number) => {

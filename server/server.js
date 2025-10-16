@@ -29,15 +29,21 @@ app.use(express.urlencoded({ extended: true }))
 
 //Database
 async function connectDB() {
+    if (!db) {
+        console.log("⚠️  No MongoDB URI provided. Running without database connection.");
+        return;
+    }
+    
     try {
         await mongoose.connect(db, {
-
+            // Add connection options if needed
         });
-        console.log("MongoDB connected");
+        console.log("✅ MongoDB connected successfully");
     }
     catch (error) {
-        console.log("Error connecting to database", error);
-        process.exit(1);
+        console.log("❌ Error connecting to database:", error.message);
+        console.log("⚠️  Server will continue running without database connection");
+        // Don't exit the process, let the server run without DB
     }
 }
 

@@ -14,6 +14,7 @@ export default function TabLayout() {
             route.name === 'lessons' ? '#508943' :
             route.name === 'badges' ? '#be814b' :
             route.name === 'settings' ? '#49092E' :
+            route.name === 'lesson' ? '#508943' :
             '#E9940C',
           height: 55,
           borderTopWidth: 0,
