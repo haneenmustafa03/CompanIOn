@@ -1,6 +1,17 @@
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import {
+  CheckersGame,
+  MatchingGame,
+  StorytellerGame,
+} from "../../components/games";
 
 const API_BASE_URL = "http://localhost:5001/api";
 
@@ -11,6 +22,11 @@ interface Game {
   skills: string[];
   difficulty: string;
 }
+
+// interface card {
+//   image: string;
+//   isFlipped: boolean;
+// }
 
 interface UserStats {
   timesPlayed: number;
@@ -25,7 +41,7 @@ export default function GameScreen() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('GameScreen mounted with gameId:', gameId);
+    console.log("GameScreen mounted with gameId:", gameId);
     if (gameId) {
       fetchGame();
     }
@@ -35,28 +51,28 @@ export default function GameScreen() {
     try {
       setLoading(true);
       setError(null);
-      
-      console.log('Fetching game with ID:', gameId);
+
+      console.log("Fetching game with ID:", gameId);
       const response = await fetch(`${API_BASE_URL}/games/${gameId}`, {
         method: "GET",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
       });
 
       console.log("Response status:", response.status);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       console.log("Game data:", data);
 
       if (data.success) {
         setGame(data.game);
         setUserStats(data.userStats);
-        console.log('Game set successfully:', data.game);
+        console.log("Game set successfully:", data.game);
       } else {
         throw new Error(data.message || "Failed to fetch game");
       }
@@ -69,61 +85,53 @@ export default function GameScreen() {
   };
 
   const handlePlayGame = () => {
-    console.log('Starting game:', game?.name);
+    console.log("Starting game:", game?.name);
     // TODO: Implement actual game logic or navigation to game play screen
     alert(`Starting ${game?.name}! Game functionality coming soon!`);
   };
 
-  const handleImageClick = (imageNumber: number) => {
-    console.log(`Clicked on image ${imageNumber}`);
-    // TODO: Add your matching game logic here
-    alert(`You clicked on image ${imageNumber}!`);
-
-    if (imageNumber === 1) {
-      
-    }
+  // Game completion handlers
+  const handleGameComplete = (gameType: string, result: any) => {
+    console.log(`${gameType} game completed:`, result);
+    // TODO: Send completion data to server
   };
 
   const renderGameContent = () => {
     if (!game) return null;
 
     // Switch between different games based on gameId
-    if (gameId === 'checkers') {
-      return (
-        <View style={styles.checkersGame}>
-          <Text>Checkers</Text>
-        </View>
-      );
-      } else if (gameId === 'matching') {
+    switch (gameId) {
+      case "checkers":
         return (
-          <View style={styles.matchingGame}>
-            <TouchableOpacity 
-              onPress={() => handleImageClick(1)}
-              style={styles.clickableImage}
-              activeOpacity={0.7}
-            >
-              <Image source={require("../../assets/gameAssets/matching/1.png")} style={styles.matchingGameImage} />
-            </TouchableOpacity>
-            {/* <TouchableOpacity onPress={() => handleImageClick(2)}>
-              <Image source={require("../../assets/gameAssets/matching/2.png")} style={styles.matchingGameImage} />
-            </TouchableOpacity> */}
+          <CheckersGame
+            onGameComplete={(score) => handleGameComplete("Checkers", score)}
+          />
+        );
+
+      case "matching":
+        return (
+          <MatchingGame
+            onGameComplete={(score) => handleGameComplete("Matching", score)}
+          />
+        );
+
+      case "storyteller":
+        return (
+          <StorytellerGame
+            onGameComplete={(story) => handleGameComplete("Storyteller", story)}
+          />
+        );
+
+      default:
+        return (
+          <View style={styles.defaultGame}>
+            <Text style={styles.gameInstructions}>🎮 {game.name}</Text>
+            <Text style={styles.gameSubtext}>{game.description}</Text>
+            <Text style={styles.placeholderText}>
+              Game content coming soon!
+            </Text>
           </View>
         );
-    } else if (gameId === 'storyteller') {
-      return (
-        <View style={styles.storytellerGame}>
-          
-        </View>
-      );
-    } else {
-      // Default case for unknown games
-      return (
-        <View style={styles.defaultGame}>
-          <Text style={styles.gameInstructions}>🎮 {game.name}</Text>
-          <Text style={styles.gameSubtext}>{game.description}</Text>
-          <Text style={styles.placeholderText}>Game content coming soon!</Text>
-        </View>
-      );
     }
   };
 
@@ -150,7 +158,7 @@ export default function GameScreen() {
         resizeMode="stretch"
       >
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>⚠️ {error || 'Game not found'}</Text>
+          <Text style={styles.errorText}>⚠️ {error || "Game not found"}</Text>
         </View>
       </ImageBackground>
     );
@@ -165,14 +173,9 @@ export default function GameScreen() {
       <View style={styles.gameContainer}>
         <Text style={styles.gameTitle}>{game.name}</Text>
         <Text style={styles.gameDescription}>{game.description}</Text>
-        
       </View>
-      
-      
-      <View style={styles.gameWrapper}>
-        {renderGameContent()}
-      </View>
-      
+
+      <View style={styles.gameWrapper}>{renderGameContent()}</View>
     </ImageBackground>
   );
 }
@@ -184,166 +187,90 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   gameContainer: {
-    position: 'absolute',
+    position: "absolute",
     backgroundColor: "#ffffff",
     opacity: 0.9,
-    margin: '5%',
+    margin: "5%",
     borderRadius: 10,
-    width: '93%',
-    height: '93%',
+    width: "93%",
+    height: "93%",
     padding: 20,
   },
   gameTitle: {
-    textAlign: 'center',    
+    textAlign: "center",
     fontSize: 28,
-    fontFamily: 'Poppins-SemiBold',
-    fontWeight: 'bold',
-    color: '#5d9f4e',
+    fontFamily: "Poppins-SemiBold",
+    fontWeight: "bold",
+    color: "#5d9f4e",
     marginBottom: 15,
   },
   gameDescription: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 16,
-    fontFamily: 'Quicksand',
-    color: 'black',
+    fontFamily: "Quicksand",
+    color: "black",
     marginBottom: 20,
     lineHeight: 24,
   },
   gameWrapper: {
-    position: 'absolute',
+    position: "absolute",
     padding: 20,
     top: 100,
     // bottom: 0,
     left: 0,
     right: 0,
-    height: '50%',
+    height: "50%",
   },
-  //  gameWrapperImage: {
-  //    width: '100%',
-  //    height: '100%',
-  //  },
-   // Game-specific styles
-   checkersGame: {
-    //  flex: 1,
-    //  justifyContent: 'center',
-    //  alignItems: 'center',
-     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-     margin: 10,
-     borderRadius: 10,
-     padding: 20,
-   },
-    matchingGameImage: {
-      width: 100,
-      height: 100,
-      borderRadius: 8,
-    },
-    clickableImage: {
-      margin: 5,
-      borderRadius: 8,
-      borderWidth: 2,
-      borderColor: 'transparent',
-    },
-    clickableImagePressed: {
-      borderColor: '#5d9f4e',
-      opacity: 0.8,
-    },
-   matchingGame: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-     margin: 10,
-     borderRadius: 10,
-     padding: 20,
-   },
-   storytellerGame: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-     margin: 10,
-     borderRadius: 10,
-     padding: 20,
-   },
-   defaultGame: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-     margin: 10,
-     borderRadius: 10,
-     padding: 20,
-   },
-   gameInstructions: {
-     fontSize: 24,
-     fontFamily: 'Poppins-SemiBold',
-     color: '#5d9f4e',
-     textAlign: 'center',
-     marginBottom: 10,
-   },
-   gameSubtext: {
-     fontSize: 16,
-     fontFamily: 'Poppins-Regular',
-     color: '#666',
-     textAlign: 'center',
-     marginBottom: 20,
-   },
-   checkersBoard: {
-     width: 200,
-     height: 200,
-     backgroundColor: '#8B4513',
-     borderRadius: 10,
-     justifyContent: 'center',
-     alignItems: 'center',
-     borderWidth: 2,
-     borderColor: '#654321',
-   },
-   matchingGrid: {
-     width: 250,
-     height: 200,
-     backgroundColor: '#E6E6FA',
-     borderRadius: 10,
-     justifyContent: 'center',
-     alignItems: 'center',
-     borderWidth: 2,
-     borderColor: '#9370DB',
-   },
-   storyArea: {
-     width: 250,
-     height: 200,
-     backgroundColor: '#F0F8FF',
-     borderRadius: 10,
-     justifyContent: 'center',
-     alignItems: 'center',
-     borderWidth: 2,
-     borderColor: '#4169E1',
-   },
-   placeholderText: {
-     fontSize: 16,
-     fontFamily: 'Poppins-Regular',
-     color: '#888',
-     textAlign: 'center',
-     fontStyle: 'italic',
-   },
-   errorContainer: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-   },
-   errorText: {
-     color: '#FF6B6B',
-     fontSize: 16,
-     textAlign: 'center',
-     fontFamily: 'Poppins-Regular',
-   },
-   loadingContainer: {
-     flex: 1,
-     justifyContent: 'center',
-     alignItems: 'center',
-   },
-   loadingText: {
-     color: '#5d9f4e',
-     fontSize: 16,
-     fontFamily: 'Poppins-Regular',
-   },
+  // Game-specific styles moved to individual components
+  defaultGame: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    margin: 10,
+    borderRadius: 10,
+    padding: 20,
+  },
+  gameInstructions: {
+    fontSize: 24,
+    fontFamily: "Poppins-SemiBold",
+    color: "#5d9f4e",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  gameSubtext: {
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+    color: "#888",
+    textAlign: "center",
+    fontStyle: "italic",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    color: "#FF6B6B",
+    fontSize: 16,
+    textAlign: "center",
+    fontFamily: "Poppins-Regular",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    color: "#5d9f4e",
+    fontSize: 16,
+    fontFamily: "Poppins-Regular",
+  },
 });
