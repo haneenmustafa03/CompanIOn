@@ -1,8 +1,17 @@
-import SmallRobot from '@/components/smallRobot';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import SmallRobot from "@/components/smallRobot";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = "http://localhost:5001/api";
 
 interface Game {
   id: string;
@@ -25,12 +34,12 @@ export default function GamesScreen() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${API_BASE_URL}/games`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
@@ -38,39 +47,39 @@ export default function GamesScreen() {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setGames(data.games);
       } else {
-        throw new Error(data.message || 'Failed to fetch games');
+        throw new Error(data.message || "Failed to fetch games");
       }
     } catch (err) {
-      console.error('Error fetching games:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load games');
-      
+      console.error("Error fetching games:", err);
+      setError(err instanceof Error ? err.message : "Failed to load games");
+
       // Fallback to mock data if API fails
       setGames([
         {
-          id: 'checkers',
-          name: 'Checkers',
-          description: 'Play checkers and practice thinking ahead',
-          skills: ['Strategy', 'Planning', 'Turn-taking'],
-          difficulty: 'Medium'
+          id: "checkers",
+          name: "Checkers",
+          description: "Play checkers and practice thinking ahead",
+          skills: ["Strategy", "Planning", "Turn-taking"],
+          difficulty: "Medium",
         },
         {
-          id: 'matching',
-          name: 'Matching Game',
-          description: 'Match pairs of cards to practice memory',
-          skills: ['Memory', 'Concentration', 'Pattern recognition'],
-          difficulty: 'Easy'
+          id: "matching",
+          name: "Matching Game",
+          description: "Match pairs of cards to practice memory",
+          skills: ["Memory", "Concentration", "Pattern recognition"],
+          difficulty: "Easy",
         },
         {
-          id: 'storyteller',
-          name: 'Story Teller',
-          description: 'Create stories and practice creativity',
-          skills: ['Creativity', 'Language', 'Sequencing'],
-          difficulty: 'Easy'
-        }
+          id: "storyteller",
+          name: "Story Teller",
+          description: "Create stories and practice creativity",
+          skills: ["Creativity", "Language", "Sequencing"],
+          difficulty: "Easy",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -78,50 +87,62 @@ export default function GamesScreen() {
   };
 
   const handleGamePress = (game: Game) => {
-    console.log('Game pressed:', game.name);
+    console.log("Game pressed:", game.name);
     // TODO: Navigate to game or show game details
+
+    router.push(`/(tabs)/game?gameId=${game.id}`);
   };
 
-  const completeGame = async (gameId: string, score?: number, duration?: number) => {
+  const completeGame = async (
+    gameId: string,
+    score?: number,
+    duration?: number
+  ) => {
+    const handleGamePress = (game: Game) => {
+      console.log("Game pressed:", game.name);
+      // TODO: Navigate to game or show game details
+
+      router.push({
+        pathname: "/game",
+        params: { gameId: game.id },
+      });
+    };
     try {
       const response = await fetch(`${API_BASE_URL}/games/${gameId}/complete`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer mock-token' // This would be a real JWT token in production
+          "Content-Type": "application/json",
+          Authorization: "Bearer mock-token", // This would be a real JWT token in production
         },
         body: JSON.stringify({
           score: score || 100,
-          duration: duration || 300 // 5 minutes default
-        })
+          duration: duration || 300, // 5 minutes default
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Game completed:', data);
+        console.log("Game completed:", data);
         // TODO: Show success message and any new badges earned
       }
     } catch (error) {
-      console.error('Error completing game:', error);
+      console.error("Error completing game:", error);
     }
   };
 
   return (
-    <ImageBackground 
-      source={require('../../assets/backgroundImages/Games.png')} 
+    <ImageBackground
+      source={require("../../assets/backgroundImages/Games.png")}
       style={styles.container}
       resizeMode="stretch"
     >
-
-
-      <View style={styles.robotWrapper}>  
-        <SmallRobot size={1.2} />  
+      <View style={styles.robotWrapper}>
+        <SmallRobot size={1.2} />
       </View>
-      
-      
+
       <View style={styles.scrollerWrapper}>
         <Text style={styles.sectionTitle}>Games: </Text>
-        
+
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#fff" />
@@ -133,15 +154,15 @@ export default function GamesScreen() {
             <Text style={styles.fallbackText}>Showing offline games</Text>
           </View>
         ) : null}
-        
+
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
           {games.map((game) => (
-            <TouchableOpacity 
-              key={game.id} 
+            <TouchableOpacity
+              key={game.id}
               style={styles.card}
               onPress={() => handleGamePress(game)}
               activeOpacity={0.7}
@@ -171,24 +192,24 @@ const styles = StyleSheet.create({
     width: 160,
     height: 140,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: "rgba(255,255,255,0.15)",
     padding: 8,
     marginRight: 8,
     marginLeft: 4,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
+    borderColor: "rgba(255,255,255,0.2)",
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundSize: 'contain',
-    backgroundPosition: 'center',
-    width: '100%',
-    height: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundSize: "contain",
+    backgroundPosition: "center",
+    width: "100%",
+    height: "100%",
   },
   scrollerWrapper: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 0,
     right: 0,
@@ -197,46 +218,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   sectionTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     marginLeft: 16,
     marginBottom: 8,
-    textShadowColor: 'rgba(0,0,0,0.4)',
+    textShadowColor: "rgba(0,0,0,0.4)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
   gameName: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 2,
-    textAlign: 'center',
+    textAlign: "center",
   },
   gameDifficulty: {
-    color: '#FFD700',
+    color: "#FFD700",
     fontSize: 10,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontWeight: "600",
+    textAlign: "center",
     marginBottom: 4,
   },
   gameDescription: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 10,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 6,
     opacity: 0.9,
   },
   skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: 2,
   },
   skillTag: {
-    color: '#87CEEB',
+    color: "#87CEEB",
     fontSize: 8,
-    backgroundColor: 'rgba(135, 206, 235, 0.2)',
+    backgroundColor: "rgba(135, 206, 235, 0.2)",
     paddingHorizontal: 4,
     paddingVertical: 1,
     borderRadius: 4,
@@ -244,36 +265,36 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   loadingContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
   },
   loadingText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     marginTop: 8,
   },
   errorContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 10,
   },
   errorText: {
-    color: '#FFB6C1',
+    color: "#FFB6C1",
     fontSize: 12,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 4,
   },
   fallbackText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 10,
     opacity: 0.7,
   },
   text: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   robotWrapper: {
-    position: 'absolute',
+    position: "absolute",
     top: 160,
     left: 80,
     width: 100,

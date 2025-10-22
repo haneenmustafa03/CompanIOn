@@ -6,6 +6,7 @@ export default function Index() {
   return (
     <ImageBackground 
       source={require('../../assets/backgroundImages/Home.png')} 
+      // source={({ uri: 'https://via.placeholder.com/800x1400.png?text=TEST+BACKGROUND' })}
       style={styles.container}
       resizeMode="stretch"
     >
@@ -19,6 +20,10 @@ export default function Index() {
           isMuted
         />
       </View>
+
+      {/* <Text style={{ color: 'white', fontSize: 24, marginBottom: 20 }}>
+        hi there
+      </Text> */}
 
       <SmallRobot size={2} />  
       
