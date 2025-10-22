@@ -15,7 +15,7 @@
   "description": "",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
-    "expo": "^54.0.13",
+    "expo": "^54.0.18",
     "expo-av": "^16.0.7",
     "expo-linking": "^8.0.8",
     "expo-router": "^6.0.10",
