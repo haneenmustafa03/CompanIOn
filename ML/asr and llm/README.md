@@ -12,4 +12,5 @@ This folder runs speech-to-text (ASR) with `transformers` and chats with a **loc
 
 ## Install (one-time)
 ```bash
-pip install "transformers[audio]" torch torchaudio soundfile numpy requests
+pip install "transformers[audio]" torch torchaudio soundfile numpy requests pyttsx3
+```
