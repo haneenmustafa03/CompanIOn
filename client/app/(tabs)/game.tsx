@@ -201,8 +201,8 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontFamily: "Poppins-SemiBold",
     fontWeight: "bold",
-    color: "#5d9f4e",
-    marginBottom: 15,
+    color: "#302638",
+    marginBottom: 5,
   },
   gameDescription: {
     textAlign: "center",
@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
   },
   gameWrapper: {
     position: "absolute",
+    paddingTop: 100,
     padding: 20,
     top: 100,
     // bottom: 0,

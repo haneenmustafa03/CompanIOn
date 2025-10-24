@@ -93,6 +93,18 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="game"
+        options={{
+          href: null, // This hides the tab from the bottom bar
+        }}
+      />
+      <Tabs.Screen
+        name="lesson"
+        options={{
+          href: null, // This hides the tab from the bottom bar
+        }}
+      />
     </Tabs>
   );
 }
