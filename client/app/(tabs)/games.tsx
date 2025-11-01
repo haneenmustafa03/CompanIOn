@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useAuth } from "../../contexts/AuthContext";
 
 const API_BASE_URL = "http://localhost:5001/api";
 
@@ -25,6 +26,7 @@ export default function GamesScreen() {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchGames();
@@ -108,12 +110,16 @@ export default function GamesScreen() {
       });
     };
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/games/${gameId}/complete`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer mock-token", // This would be a real JWT token in production
-        },
+        headers,
         body: JSON.stringify({
           score: score || 100,
           duration: duration || 300, // 5 minutes default

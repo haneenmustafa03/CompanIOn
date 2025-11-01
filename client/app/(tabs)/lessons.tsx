@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SmallRobot from '../../components/smallRobot';
+import { useAuth } from '../../contexts/AuthContext';
 const API_BASE_URL = 'http://localhost:5001/api';
 
 interface Lesson {
@@ -18,6 +19,7 @@ export default function LessonsScreen() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
     fetchLessons();
@@ -92,12 +94,16 @@ export default function LessonsScreen() {
 
   const completeLesson = async (lessonId: string, score?: number, timeSpent?: number) => {
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/lessons/${lessonId}/complete`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer mock-token' // This would be a real JWT token in production
-        },
+        headers,
         body: JSON.stringify({
           score: score || 100,
           timeSpent: timeSpent || 15
