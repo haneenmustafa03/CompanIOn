@@ -5,10 +5,13 @@ import mongoose from "mongoose";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+dotenv.config();
+
 //Routes
 import authRoutes from './routes/auth.js';
 import gameRoutes from './routes/games.js';
 import lessonRoutes from './routes/lessons.js';
+
 //import parentRoutes from './routes/parent.js';
 //import settingsRoutes from './routes/settings.js';
 

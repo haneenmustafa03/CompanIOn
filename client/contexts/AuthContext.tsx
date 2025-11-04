@@ -1,8 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import { Platform } from 'react-native';
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = Platform.select({
+  ios: 'http://localhost:5001/api',
+  android: 'http://10.0.2.2:5001/api',
+  default: 'http://localhost:5001/api',
+});
 
 interface User {
   _id: string;
