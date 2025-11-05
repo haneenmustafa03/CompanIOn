@@ -20,6 +20,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { login, user, loading: authLoading } = useAuth();
 
   // Redirect if already logged in
@@ -38,11 +39,16 @@ export default function LoginScreen() {
     try {
       setLoading(true);
       await login(email.trim(), password);
+      console.log("Login successful");
     } catch (error) {
       Alert.alert(
         "Login Failed",
         error instanceof Error ? error.message : "Invalid email or password"
       );
+      setError(
+        error instanceof Error ? error.message : "Invalid email or password"
+      );
+      console.log("Login failed", error);
     } finally {
       setLoading(false);
     }
@@ -72,6 +78,8 @@ export default function LoginScreen() {
           <View style={styles.formContainer}>
             <Text style={styles.title}>Welcome Back!</Text>
             <Text style={styles.subtitle}>Log in to continue learning</Text>
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
 
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
@@ -128,6 +136,12 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 10,
+  },
   container: {
     flex: 1,
     width: "100%",
@@ -168,16 +182,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.2)",
   },
-  //   title: {
-  //     color: "#fff",
-  //     fontSize: 28,
-  //     fontWeight: "bold",
-  //     textAlign: "center",
-  //     marginBottom: 8,
-  //     textShadowColor: "rgba(0,0,0,0.4)",
-  //     textShadowOffset: { width: 0, height: 2 },
-  //     textShadowRadius: 4,
-  //   },
   subtitle: {
     color: "rgba(255,255,255,0.9)",
     fontSize: 16,
