@@ -14,7 +14,7 @@ export default function GameContainer({
 }: GameContainerProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title}>{title} q</Text>
       {description && <Text style={styles.description}>{description}</Text>}
       <View style={styles.gameContent}>{children}</View>
     </View>
