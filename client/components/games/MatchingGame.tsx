@@ -155,9 +155,29 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
     }
   };
 
+  const resetGame = () => {
+    setCards([
+      { id: 1, shape: "circle", isFlipped: false, isMatched: false },
+      { id: 2, shape: "square", isFlipped: false, isMatched: false },
+      { id: 3, shape: "triangle", isFlipped: false, isMatched: false },
+      { id: 4, shape: "triangle", isFlipped: false, isMatched: false },
+      { id: 5, shape: "circle", isFlipped: false, isMatched: false },
+      { id: 6, shape: "square", isFlipped: false, isMatched: false },
+    ]);
+    setFlippedCount(0);
+    setMatches(0);
+    setAttempts(0);
+    setCurrentlyFlippedCards({
+      id1: 0,
+      shape1: "",
+      id2: 0,
+      shape2: "",
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Memory Matching Game</Text>
+      {/* <Text style={styles.title}>Memory Matching Game</Text> */}
 
       <View style={styles.statsContainer}>
         <Text style={styles.statText}>Matches: {matches}/3</Text>
@@ -176,6 +196,12 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
           </TouchableOpacity>
         ))}
       </View>
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => resetGame()}>
+          <Text style={styles.buttonText}>Reset Game</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -185,7 +211,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    // backgroundColor: "rgba(255, 255, 255, 0.9)",
     margin: 10,
     borderRadius: 10,
     padding: 20,
@@ -213,7 +239,7 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
-    gap: 10,
+    // gap: 10,
   },
   cardContainer: {
     alignItems: "center",
@@ -234,5 +260,18 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins-Regular",
     color: "#666",
     marginTop: 5,
+  },
+  buttonContainer: {
+    marginTop: 20,
+  },
+  button: {
+    backgroundColor: "#302638",
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
   },
 });

@@ -5,10 +5,13 @@ import mongoose from "mongoose";
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+dotenv.config();
+
 //Routes
 import authRoutes from './routes/auth.js';
 import gameRoutes from './routes/games.js';
 import lessonRoutes from './routes/lessons.js';
+
 //import parentRoutes from './routes/parent.js';
 //import settingsRoutes from './routes/settings.js';
 
@@ -28,26 +31,37 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
 //Database
+let isDBConnected = false;
+
 async function connectDB() {
     if (!db) {
         console.log("⚠️  No MongoDB URI provided. Running without database connection.");
-        return;
+        console.log("⚠️  Set MONGO_URI in .env file to enable database features.");
+        return false;
     }
     
     try {
         await mongoose.connect(db, {
             // Add connection options if needed
         });
+        isDBConnected = true;
         console.log("✅ MongoDB connected successfully");
+        return true;
     }
     catch (error) {
         console.log("❌ Error connecting to database:", error.message);
         console.log("⚠️  Server will continue running without database connection");
-        // Don't exit the process, let the server run without DB
+        isDBConnected = false;
+        return false;
     }
 }
 
-connectDB();
+// Make isDBConnected available globally
+app.locals.isDBConnected = false;
+
+connectDB().then((connected) => {
+    app.locals.isDBConnected = connected;
+});
 
 app.get("/", (req, res) => {
     res.json({ message: 'companIOn API running'});

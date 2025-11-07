@@ -1,13 +1,13 @@
-import { useEffect, useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, View } from 'react-native';
+import { useEffect, useRef } from "react";
+import { Animated, Dimensions, StyleSheet, View } from "react-native";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 interface SmallRobotProps {
-  size?: 'small' | 'medium' | 'large' | number; // number for custom scale factor
+  size?: "small" | "medium" | "large" | number; // number for custom scale factor
 }
 
-export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
+export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
   const floatAnim = useRef(new Animated.Value(0)).current;
   const blinkAnim = useRef(new Animated.Value(1)).current;
   const waveLeftAnim = useRef(new Animated.Value(0)).current;
@@ -16,14 +16,18 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
 
   // Calculate scale factor based on size prop
   const getScaleFactor = () => {
-    if (typeof size === 'number') {
+    if (typeof size === "number") {
       return size;
     }
     switch (size) {
-      case 'small': return 0.5;
-      case 'medium': return 0.75;
-      case 'large': return 1;
-      default: return 0.75;
+      case "small":
+        return 0.5;
+      case "medium":
+        return 0.75;
+      case "large":
+        return 1;
+      default:
+        return 0.75;
     }
   };
 
@@ -111,37 +115,44 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
         }),
       ])
     ).start();
-  }, []);
+  }, [
+    scaleFactor,
+    floatAnim,
+    blinkAnim,
+    waveLeftAnim,
+    waveRightAnim,
+    shadowAnim,
+  ]);
 
   // Generate dynamic styles based on scale factor
   const dynamicStyles = StyleSheet.create({
     head: {
       width: 90 * scaleFactor,
       height: 70 * scaleFactor,
-      backgroundColor: '#E5E5E5',
+      backgroundColor: "#E5E5E5",
       borderTopLeftRadius: 45 * scaleFactor,
       borderTopRightRadius: 45 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
       borderBottomRightRadius: 30 * scaleFactor,
       marginBottom: -10 * scaleFactor,
-      position: 'relative' as const,
+      position: "relative" as const,
     },
     visor: {
       width: 70 * scaleFactor,
       height: 30 * scaleFactor,
-      backgroundColor: '#2C3E50',
+      backgroundColor: "#2C3E50",
       borderRadius: 15 * scaleFactor,
-      position: 'absolute' as const,
+      position: "absolute" as const,
       top: 25 * scaleFactor,
       left: 10 * scaleFactor,
-      overflow: 'hidden' as const,
+      overflow: "hidden" as const,
     },
     eye: {
       width: 10 * scaleFactor,
       height: 18 * scaleFactor,
-      backgroundColor: '#7B93DB',
+      backgroundColor: "#7B93DB",
       borderRadius: 5 * scaleFactor,
-      position: 'absolute' as const,
+      position: "absolute" as const,
       top: 6 * scaleFactor,
     },
     eyeLeft: {
@@ -153,19 +164,19 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
     body: {
       width: 80 * scaleFactor,
       height: 65 * scaleFactor,
-      backgroundColor: '#E5E5E5',
+      backgroundColor: "#E5E5E5",
       borderTopLeftRadius: 20 * scaleFactor,
       borderTopRightRadius: 20 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
       borderBottomRightRadius: 30 * scaleFactor,
-      position: 'relative' as const,
+      position: "relative" as const,
     },
     arm: {
       width: 15 * scaleFactor,
       height: 50 * scaleFactor,
-      backgroundColor: '#E5E5E5',
+      backgroundColor: "#264653",
       borderRadius: 8 * scaleFactor,
-      position: 'absolute' as const,
+      position: "absolute" as const,
       top: 10 * scaleFactor,
     },
     armLeft: {
@@ -177,7 +188,7 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
     shadow: {
       width: 60 * scaleFactor,
       height: 10 * scaleFactor,
-      backgroundColor: 'rgba(0, 0, 0, 0.2)',
+      backgroundColor: "rgba(0, 0, 0, 0.2)",
       borderRadius: 30 * scaleFactor,
       marginTop: 5 * scaleFactor,
     },
@@ -218,8 +229,6 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
               ]}
             />
           </View>
-          {/* Antenna */}
-          {/* <View style={styles.antenna} /> */}
         </View>
 
         {/* Body */}
@@ -232,10 +241,11 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
               {
                 transform: [
                   { translateY: -25 * scaleFactor },
-                  { rotate: waveLeftAnim.interpolate({
+                  {
+                    rotate: waveLeftAnim.interpolate({
                       inputRange: [-12 * scaleFactor, 0],
-                      outputRange: ['-25deg', '0deg'],
-                    })
+                      outputRange: ["-25deg", "0deg"],
+                    }),
                   },
                   { translateY: 25 * scaleFactor },
                 ],
@@ -250,10 +260,11 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
               {
                 transform: [
                   { translateY: -25 * scaleFactor },
-                  { rotate: waveRightAnim.interpolate({
+                  {
+                    rotate: waveRightAnim.interpolate({
                       inputRange: [0, 12 * scaleFactor],
-                      outputRange: ['0deg', '25deg'],
-                    })
+                      outputRange: ["0deg", "25deg"],
+                    }),
                   },
                   { translateY: 25 * scaleFactor },
                 ],
@@ -278,11 +289,11 @@ export default function SmallRobot({ size = 'medium' }: SmallRobotProps) {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
   },
   robot: {
-    alignItems: 'center',
+    alignItems: "center",
   },
 });
