@@ -79,6 +79,10 @@ router.post("/register", checkDBConnection, async (req, res) => {
     }
 
     //get user token
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not configured on the server');
+    }
+
     const token = jwt.sign(
       { userId: user._id, accountType: user.accountType },
       process.env.JWT_SECRET
@@ -96,6 +100,7 @@ router.post("/register", checkDBConnection, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error during registration.",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -148,6 +153,7 @@ router.post("/login", checkDBConnection, async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error during login",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -182,6 +188,7 @@ router.get("/me", checkDBConnection, async (req, res) => {
     res.status(401).json({
       success: false,
       message: "Invalid token",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });

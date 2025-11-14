@@ -76,15 +76,22 @@ app.use('/api/games', gameRoutes);
 
 
 //error handling for middleware
+// Global error handler — return helpful info in development
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-      success: false,
-      message: "Middleware error",
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+        console.error('Unhandled error:', err);
+        const payload = {
+            success: false,
+            message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message,
+        };
+
+        if (process.env.NODE_ENV !== 'production') {
+            // include stack for easier debugging locally
+            payload.stack = err.stack;
+        }
+
+        res.status(err.status || 500).json(payload);
 });
 
 app.listen(PORT, () => {
-  console.log("Server is running on port 5001");
+    console.log(`Server is running on port ${PORT}`);
 });
