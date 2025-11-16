@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import AuthGuard from "../../components/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
+import { BottomTabsScreen } from "react-native-screens";
 
 export default function TabLayout() {
   const { user } = useAuth();
@@ -15,12 +16,17 @@ export default function TabLayout() {
             tabBarInactiveTintColor: "#fff",
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: "#25292e",
+              backgroundColor:
+                route.name === "parentHome"
+                  ? "#ea9307"
+                  : route.name === "childDetail"
+                  ? "#ea9307"
+                  : "#91cbdb",
             },
           })}
         >
           <Tabs.Screen
-            name="index"
+            name="parentHome"
             options={{
               title: "Home",
               tabBarIcon: ({ color, focused }) => (
@@ -33,7 +39,7 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
-            name="settings"
+            name="parentSettings"
             options={{
               title: "Settings",
               tabBarIcon: ({ color, focused }) => (
@@ -47,9 +53,15 @@ export default function TabLayout() {
           />
           {/* Hide tabs that parents shouldn't see */}
           <Tabs.Screen
+            name="index"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
             name="lessons"
             options={{
-              href: null, // This hides the tab from the bottom bar
+              href: null,
             }}
           />
           <Tabs.Screen
@@ -76,9 +88,22 @@ export default function TabLayout() {
               href: null,
             }}
           />
+          <Tabs.Screen
+            name="settings"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="childDetail"
+            options={{
+              href: null, // This hides the tab from the bottom bar
+            }}
+          />
         </Tabs>
       </AuthGuard>
     );
+    // } else if (user?.accountType === "child") {
   }
   return (
     <AuthGuard>
@@ -96,7 +121,7 @@ export default function TabLayout() {
                 : route.name === "lessons"
                 ? "#508943"
                 : route.name === "badges"
-                ? "#be814b"
+                ? "#812a39"
                 : route.name === "settings"
                 ? "#49092E"
                 : route.name === "lesson"
@@ -173,6 +198,18 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="parentHome"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
+          name="parentSettings"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
           name="game"
           options={{
             href: null, // This hides the tab from the bottom bar
@@ -180,6 +217,12 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="lesson"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
+          name="childDetail"
           options={{
             href: null, // This hides the tab from the bottom bar
           }}

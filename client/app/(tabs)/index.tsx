@@ -1,5 +1,5 @@
-import { Audio, ResizeMode, Video } from 'expo-av';
-import { useRef, useState } from 'react';
+import { Audio, ResizeMode, Video } from "expo-av";
+import { useRef, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import SmallRobot from '../../components/smallRobot';
@@ -12,11 +12,14 @@ export default function Index() {
 
   const startRecording = async () => {
     try {
-      console.log('Requesting permissions...');
+      console.log("Requesting permissions...");
       const permission = await Audio.requestPermissionsAsync();
-      
-      if (permission.status !== 'granted') {
-        Alert.alert('Permission Required', 'Please grant microphone permission to record audio.');
+
+      if (permission.status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Please grant microphone permission to record audio."
+        );
         return;
       }
 
@@ -25,32 +28,31 @@ export default function Index() {
         playsInSilentModeIOS: true,
       });
 
-      console.log('Starting recording...');
+      console.log("Starting recording...");
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      
+
       setRecording(recording);
       setIsRecording(true);
-      console.log('Recording started');
+      console.log("Recording started");
 
       // Auto-stop after 10 seconds
       recordingTimeout.current = setTimeout(() => {
         stopRecording();
       }, 10000);
-
     } catch (err) {
-      console.error('Failed to start recording', err);
-      Alert.alert('Error', 'Failed to start recording. Please try again.');
+      console.error("Failed to start recording", err);
+      Alert.alert("Error", "Failed to start recording. Please try again.");
     }
   };
 
   const stopRecording = async () => {
     if (!recording) return;
 
-    console.log('Stopping recording...');
+    console.log("Stopping recording...");
     setIsRecording(false);
-    
+
     // Clear auto-stop timeout
     if (recordingTimeout.current) {
       clearTimeout(recordingTimeout.current);
@@ -62,10 +64,10 @@ export default function Index() {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
       });
-      
+
       const uri = recording.getURI();
-      console.log('Recording stopped and stored at', uri);
-      
+      console.log("Recording stopped and stored at", uri);
+
       setRecording(null);
 
       if (uri) {
@@ -73,98 +75,102 @@ export default function Index() {
         await sendAudioToChatbot(uri);
       }
     } catch (err) {
-      console.error('Failed to stop recording', err);
+      console.error("Failed to stop recording", err);
     }
   };
 
   const sendAudioToChatbot = async (audioUri: string) => {
     try {
-      console.log('📤 Sending audio to chatbot:', audioUri);
-      
+      console.log("📤 Sending audio to chatbot:", audioUri);
+
       // Create form data with the audio file
       const formData = new FormData();
-      
+
       // For web, we need to fetch the blob and convert it to a file
-      if (audioUri.startsWith('blob:')) {
-        console.log('🌐 Web platform detected, converting blob to file...');
+      if (audioUri.startsWith("blob:")) {
+        console.log("🌐 Web platform detected, converting blob to file...");
         const response = await fetch(audioUri);
         const blob = await response.blob();
-        
+
         // Create a file from the blob
-        const file = new File([blob], 'recording.m4a', { type: 'audio/m4a' });
-        formData.append('audio', file);
+        const file = new File([blob], "recording.m4a", { type: "audio/m4a" });
+        formData.append("audio", file);
       } else {
         // For mobile (React Native)
-        const uriParts = audioUri.split('/');
+        const uriParts = audioUri.split("/");
         const fileName = uriParts[uriParts.length - 1];
-        
-        formData.append('audio', {
+
+        formData.append("audio", {
           uri: audioUri,
-          type: 'audio/m4a',
-          name: fileName || 'recording.m4a',
+          type: "audio/m4a",
+          name: fileName || "recording.m4a",
         } as any);
       }
-      
-      console.log('🌐 Sending request to server...');
-      
+
+      console.log("🌐 Sending request to server...");
+
       // Send to your Express server
-      const response = await fetch('http://localhost:5001/api/chatbot/process-audio', {
-        method: 'POST',
-        body: formData,
-        // Don't set Content-Type header - let the browser set it with boundary
-      });
-      
-      console.log('📨 Response status:', response.status);
-      
+      const response = await fetch(
+        "http://localhost:5001/api/chatbot/process-audio",
+        {
+          method: "POST",
+          body: formData,
+          // Don't set Content-Type header - let the browser set it with boundary
+        }
+      );
+
+      console.log("📨 Response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to process audio');
+        throw new Error(errorData.message || "Failed to process audio");
       }
-      
+
       const result = await response.json();
-      console.log('✅ Chatbot response:', result);
-      
+      console.log("✅ Chatbot response:", result);
+
       if (result.success && result.text) {
-        Alert.alert('Companion Says:', result.text);
-        
+        Alert.alert("Companion Says:", result.text);
+
         // Play the TTS audio response
         if (result.audioFile) {
           await playTTSResponse(result.audioFile, result.audioMimeType);
         }
       }
-      
     } catch (err) {
-      console.error('❌ Failed to send audio to chatbot', err);
-      Alert.alert('Error', 'Failed to communicate with chatbot. Make sure the server is running.');
+      console.error("❌ Failed to send audio to chatbot", err);
+      Alert.alert(
+        "Error",
+        "Failed to communicate with chatbot. Make sure the server is running."
+      );
     }
   };
 
   const playTTSResponse = async (audioBase64: string, mimeType: string) => {
     try {
-      console.log('🔊 Playing TTS response...');
-      
+      console.log("🔊 Playing TTS response...");
+
       // Convert base64 to data URI
       const audioDataUri = `data:${mimeType};base64,${audioBase64}`;
-      
+
       // Create and play the sound
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioDataUri },
         { shouldPlay: true }
       );
-      
-      console.log('▶️ TTS audio playing...');
-      
+
+      console.log("▶️ TTS audio playing...");
+
       // Clean up sound after it finishes
       sound.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded && status.didJustFinish) {
-          console.log('✅ TTS playback finished');
+          console.log("✅ TTS playback finished");
           sound.unloadAsync();
         }
       });
-      
     } catch (err) {
-      console.error('❌ Failed to play TTS audio', err);
-      Alert.alert('Error', 'Received response but failed to play audio.');
+      console.error("❌ Failed to play TTS audio", err);
+      Alert.alert("Error", "Received response but failed to play audio.");
     }
   };
 
@@ -197,8 +203,9 @@ export default function Index() {
 
   // Child account - show chatbot interface with recording
   return (
-    <ImageBackground 
-      source={require('../../assets/backgroundImages/Home.png')} 
+    <ImageBackground
+      source={require("../../assets/backgroundImages/Home.png")}
+      // source={({ uri: 'https://via.placeholder.com/800x1400.png?text=TEST+BACKGROUND' })}
       style={styles.container}
       resizeMode="stretch"
     >
@@ -213,20 +220,21 @@ export default function Index() {
         />
       </View>
 
-      <SmallRobot size={2} />  
-      
+      {/* <Text style={{ color: 'white', fontSize: 24, marginBottom: 20 }}>
+        hi there
+      </Text> */}
+
+      <SmallRobot size={2} />
+
       {/* Recording Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={handleMicrophonePress}
         activeOpacity={1}
         style={styles.microphoneButton}
       >
-        <Image 
-          source={require('../../assets/UIElements/microphone.png')} 
-          style={[
-            styles.image,
-            { opacity: isRecording ? 0.5 : 1 }
-          ]} 
+        <Image
+          source={require("../../assets/UIElements/microphone.png")}
+          style={[styles.image, { opacity: isRecording ? 0.5 : 1 }]}
         />
       </TouchableOpacity>
     </ImageBackground>
@@ -238,17 +246,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#25292e",
     alignItems: "center",
-    backgroundSize: "contain",
-    backgroundPosition: "center",
-    width: "105%",
+    justifyContent: "space-between",
+    paddingVertical: 20,
+    width: "100%",
     height: "100%",
   },
   parentContainer: {
     flex: 1,
     backgroundColor: "#C0CFE0",
     alignItems: "center",
-    backgroundSize: "contain",
-    backgroundPosition: "center",
     width: "100%",
     height: "100%",
   },
@@ -257,7 +263,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     width: "100%",
-    height: "60%",
   },
   robotAnimation: {
     width: 300,
@@ -267,14 +272,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   microphoneButton: {
-    position: 'absolute',
-    bottom: 10,
+    paddingBottom: 20,
   },
   image: {
     width: 140,
     height: 140,
-    position: "absolute",
-    bottom: 10,
   },
   title: {
     color: "#fff",

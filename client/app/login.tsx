@@ -26,7 +26,12 @@ export default function LoginScreen() {
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.replace("/(tabs)");
+      if (user.accountType === "parent") {
+        router.replace("/parentHome");
+      } else {
+        router.replace("/(tabs)");
+      }
+      // r÷outer.replace("/parentHome" /* or "/childHome" based on user.accountType */);
     }
   }, [user, authLoading]);
 

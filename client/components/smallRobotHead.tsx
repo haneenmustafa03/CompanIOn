@@ -5,9 +5,13 @@ const { width, height } = Dimensions.get("window");
 
 interface SmallRobotProps {
   size?: "small" | "medium" | "large" | number; // number for custom scale factor
+  color?: string;
 }
 
-export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
+export default function SmallRobotHead({
+  size = "medium",
+  color,
+}: SmallRobotProps) {
   const floatAnim = useRef(new Animated.Value(0)).current;
   const blinkAnim = useRef(new Animated.Value(1)).current;
   const waveLeftAnim = useRef(new Animated.Value(0)).current;
@@ -33,103 +37,12 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
 
   const scaleFactor = getScaleFactor();
 
-  useEffect(() => {
-    // Float animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatAnim, {
-          toValue: -10 * scaleFactor,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatAnim, {
-          toValue: 0,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Blink animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.delay(3800),
-        Animated.timing(blinkAnim, {
-          toValue: 0.1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(blinkAnim, {
-          toValue: 1,
-          duration: 100,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Wave left arm
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(waveLeftAnim, {
-          toValue: -12 * scaleFactor,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(waveLeftAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Wave right arm (delayed)
-    Animated.loop(
-      Animated.sequence([
-        Animated.delay(1000),
-        Animated.timing(waveRightAnim, {
-          toValue: 12 * scaleFactor,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(waveRightAnim, {
-          toValue: 0,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
-    // Shadow pulse
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(shadowAnim, {
-          toValue: 0.8,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shadowAnim, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [
-    scaleFactor,
-    floatAnim,
-    blinkAnim,
-    waveLeftAnim,
-    waveRightAnim,
-    shadowAnim,
-  ]);
-
   // Generate dynamic styles based on scale factor
   const dynamicStyles = StyleSheet.create({
     head: {
       width: 90 * scaleFactor,
       height: 70 * scaleFactor,
-      backgroundColor: "#ffffff",
+      backgroundColor: color || "#E5E5E5",
       borderTopLeftRadius: 45 * scaleFactor,
       borderTopRightRadius: 45 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
@@ -185,13 +98,6 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
     armRight: {
       right: -12 * scaleFactor,
     },
-    shadow: {
-      width: 60 * scaleFactor,
-      height: 10 * scaleFactor,
-      backgroundColor: "rgba(0, 0, 0, 0.2)",
-      borderRadius: 30 * scaleFactor,
-      marginTop: 5 * scaleFactor,
-    },
   });
 
   return (
@@ -230,58 +136,6 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
             />
           </View>
         </View>
-
-        {/* Body */}
-        <View style={dynamicStyles.body}>
-          {/* Left Arm */}
-          <Animated.View
-            style={[
-              dynamicStyles.arm,
-              dynamicStyles.armLeft,
-              {
-                transform: [
-                  { translateY: -25 * scaleFactor },
-                  {
-                    rotate: waveLeftAnim.interpolate({
-                      inputRange: [-12 * scaleFactor, 0],
-                      outputRange: ["-25deg", "0deg"],
-                    }),
-                  },
-                  { translateY: 25 * scaleFactor },
-                ],
-              },
-            ]}
-          />
-          {/* Right Arm */}
-          <Animated.View
-            style={[
-              dynamicStyles.arm,
-              dynamicStyles.armRight,
-              {
-                transform: [
-                  { translateY: -25 * scaleFactor },
-                  {
-                    rotate: waveRightAnim.interpolate({
-                      inputRange: [0, 12 * scaleFactor],
-                      outputRange: ["0deg", "25deg"],
-                    }),
-                  },
-                  { translateY: 25 * scaleFactor },
-                ],
-              },
-            ]}
-          />
-        </View>
-
-        {/* Shadow */}
-        <Animated.View
-          style={[
-            dynamicStyles.shadow,
-            {
-              transform: [{ scale: shadowAnim }],
-            },
-          ]}
-        />
       </Animated.View>
     </View>
   );

@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     paddingTop: 100,
     padding: 20,
-    top: 100,
+    // top: 100,
     // bottom: 0,
     left: 0,
     right: 0,
