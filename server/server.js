@@ -9,6 +9,7 @@ dotenv.config();
 
 //Routes
 import authRoutes from './routes/auth.js';
+import chatbotRoutes from './routes/chatbot.js';
 import gameRoutes from './routes/games.js';
 import lessonRoutes from './routes/lessons.js';
 
@@ -70,6 +71,7 @@ app.get("/", (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/games', gameRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 //app.use('/api/parent', parentRoutes);
 //app.use('/api/settings', settingsRoutes);
 

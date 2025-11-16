@@ -1,24 +1,31 @@
 from transformers import pipeline
 import requests, json, sys, os, argparse
 from datetime import datetime
-import pyttsx3
 
 # Configuration
 HISTORY_FILE = "conversation_history.json"
 TTS_OUTPUT_DIR = "tts_output"
 
 def initialize_tts():
-    """Initialize the TTS engine for file generation only"""
+    """Initialize the TTS engine (gTTS preferred, falls back to pyttsx3)"""
+    
+    # Try gTTS first - natural sounding voice
     try:
-        # Initialize with specific driver if needed (Windows SAPI)
-        engine = pyttsx3.init('sapi5')  # Explicitly use Windows SAPI
+        from gtts import gTTS
+        print("Using gTTS (Google Text-to-Speech) engine")
+        return {'engine': 'gtts'}
+    except ImportError:
+        print("gTTS not installed. Install with: pip install gtts")
+        print("Falling back to pyttsx3...")
+    
+    # Fallback: pyttsx3 (robotic but works offline)
+    try:
+        import pyttsx3
+        engine = pyttsx3.init('sapi5')
         
-        # Configure TTS settings for a friendly companion voice
         voices = engine.getProperty('voices')
-        
         if voices:
-            print(f"Available voices: {len(voices)}")
-            # Try to find a female voice (often more suitable for companion apps)
+            print(f"Using pyttsx3 with {len(voices)} available voices")
             for voice in voices:
                 voice_name = voice.name.lower() if voice.name else ""
                 if any(name in voice_name for name in ['female', 'zira', 'hazel', 'eva', 'helena']):
@@ -28,34 +35,42 @@ def initialize_tts():
             else:
                 print(f"Using default voice: {voices[0].name if voices[0].name else 'Unknown'}")
         
-        # Set speech rate (words per minute) - slower for better comprehension
-        engine.setProperty('rate', 160)  # Slightly slower for clarity
-        
-        # Set volume (0.0 to 1.0)
+        engine.setProperty('rate', 160)
         engine.setProperty('volume', 0.95)
         
-        return engine
+        return {'engine': 'pyttsx3', 'model': engine}
     except Exception as e:
-        print(f"Warning: Could not initialize TTS engine: {e}")
+        print(f"Warning: Could not initialize any TTS engine: {e}")
         return None
 
-def generate_tts_file(text, engine=None):
-    """Generate TTS audio file from text"""
-    if engine is None:
+def generate_tts_file(text, engine_config=None):
+    """Generate TTS audio file from text using configured engine"""
+    if engine_config is None:
         return None
     
     try:
-        # Ensure output directory exists
         os.makedirs(TTS_OUTPUT_DIR, exist_ok=True)
-        
-        # Generate filename with timestamp
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = os.path.join(TTS_OUTPUT_DIR, f"response_{timestamp}.wav")
         
-        # Save to file
-        engine.save_to_file(text, filename)
-        engine.runAndWait()
-        print(f"TTS audio saved to: {filename}")
+        engine_type = engine_config.get('engine')
+        
+        if engine_type == 'gtts':
+            # Google TTS - natural sounding voice
+            from gtts import gTTS
+            tts = gTTS(text=text, lang='en', slow=False, tld='com')
+            # gTTS produces mp3, convert filename
+            filename = filename.replace('.wav', '.mp3')
+            tts.save(filename)
+            print(f"[OK] TTS audio saved (gTTS): {filename}")
+            
+        elif engine_type == 'pyttsx3':
+            # pyttsx3 - offline but robotic
+            model = engine_config.get('model')
+            model.save_to_file(text, filename)
+            model.runAndWait()
+            print(f"[OK] TTS audio saved (pyttsx3): {filename}")
+        
         return filename
             
     except Exception as e:
