@@ -19,16 +19,18 @@ export default function ParentSettingsScreen() {
   const [weeklyReports, setWeeklyReports] = useState(true);
 
   const handleLogout = async () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", onPress: () => {}, style: "cancel" },
-      {
-        text: "Log Out",
-        onPress: async () => {
-          await logout();
-        },
-        style: "destructive",
-      },
-    ]);
+    // Alert.alert("Log Out", "Are you sure you want to log out?", [
+    //   { text: "Cancel", onPress: () => {}, style: "cancel" },
+    //   {
+    //     text: "Log Out",
+    //     onPress: async () => {
+    //       await logout();
+    //     },
+    //     style: "destructive",
+    //   },
+    // ]);
+    console.log("Logging out...");
+    await logout();
   };
 
   const handleEditProfile = () => {

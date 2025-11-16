@@ -129,7 +129,7 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
     head: {
       width: 90 * scaleFactor,
       height: 70 * scaleFactor,
-      backgroundColor: "#E5E5E5",
+      backgroundColor: "#ffffff",
       borderTopLeftRadius: 45 * scaleFactor,
       borderTopRightRadius: 45 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
@@ -164,7 +164,7 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
     body: {
       width: 80 * scaleFactor,
       height: 65 * scaleFactor,
-      backgroundColor: "#E5E5E5",
+      backgroundColor: "white",
       borderTopLeftRadius: 20 * scaleFactor,
       borderTopRightRadius: 20 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,

@@ -92,6 +92,7 @@ export default function TabLayout() {
         </Tabs>
       </AuthGuard>
     );
+    // } else if (user?.accountType === "child") {
   }
   return (
     <AuthGuard>
@@ -109,7 +110,7 @@ export default function TabLayout() {
                 : route.name === "lessons"
                 ? "#508943"
                 : route.name === "badges"
-                ? "#be814b"
+                ? "#812a39"
                 : route.name === "settings"
                 ? "#49092E"
                 : route.name === "lesson"
@@ -183,6 +184,18 @@ export default function TabLayout() {
                 size={24}
               />
             ),
+          }}
+        />
+        <Tabs.Screen
+          name="parentHome"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
+          name="parentSettings"
+          options={{
+            href: null, // This hides the tab from the bottom bar
           }}
         />
         <Tabs.Screen

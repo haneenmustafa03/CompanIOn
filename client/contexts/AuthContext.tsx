@@ -1,19 +1,19 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { Platform } from 'react-native';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { Platform } from "react-native";
 
 const API_BASE_URL = Platform.select({
-  ios: 'http://localhost:5001/api',
-  android: 'http://10.0.2.2:5001/api',
-  default: 'http://localhost:5001/api',
+  ios: "http://localhost:5001/api",
+  android: "http://10.0.2.2:5001/api",
+  default: "http://localhost:5001/api",
 });
 
 interface User {
   _id: string;
   email: string;
   name: string;
-  accountType: 'parent' | 'child';
+  accountType: "parent" | "child";
   age?: number;
   parentEmail?: string;
 }
@@ -32,7 +32,7 @@ interface SignupData {
   email: string;
   password: string;
   name: string;
-  accountType: 'parent' | 'child';
+  accountType: "parent" | "child";
   age?: number;
   parentEmail?: string;
 }
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('authToken');
+      const storedToken = await AsyncStorage.getItem("authToken");
       if (storedToken) {
         // Verify token by fetching user data
         const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -68,12 +68,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         // Token is invalid, clear it
-        await AsyncStorage.removeItem('authToken');
+        await AsyncStorage.removeItem("authToken");
       }
       setToken(null);
       setUser(null);
     } catch (error) {
-      console.error('Auth check error:', error);
+      console.error("Auth check error:", error);
       setToken(null);
       setUser(null);
     } finally {
@@ -84,9 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
@@ -94,15 +94,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success && data.token) {
-        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem("authToken", data.token);
         setToken(data.token);
         setUser(data.user);
-        router.replace('/(tabs)');
+        router.replace("/settings");
       } else {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || "Login failed");
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       throw error;
     }
   };
@@ -110,9 +110,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (signupData: SignupData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(signupData),
       });
@@ -120,32 +120,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
 
       if (data.success && data.token) {
-        await AsyncStorage.setItem('authToken', data.token);
+        await AsyncStorage.setItem("authToken", data.token);
         setToken(data.token);
         setUser(data.user);
-        router.replace('/(tabs)');
+        router.replace("/(tabs)");
       } else {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || "Registration failed");
       }
     } catch (error) {
-      console.error('Signup error:', error);
+      console.error("Signup error:", error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem("authToken");
       setToken(null);
       setUser(null);
-      router.replace('/login');
+      router.replace("/login");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, signup, logout, checkAuth }}>
+    <AuthContext.Provider
+      value={{ user, token, loading, login, signup, logout, checkAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -154,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
