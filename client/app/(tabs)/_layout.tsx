@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import AuthGuard from "../../components/AuthGuard";
 import { useAuth } from "@/contexts/AuthContext";
+import { BottomTabsScreen } from "react-native-screens";
 
 export default function TabLayout() {
   const { user } = useAuth();
@@ -16,7 +17,11 @@ export default function TabLayout() {
             headerShown: false,
             tabBarStyle: {
               backgroundColor:
-                route.name === "parentHome" ? "#ea9307" : "#91cbdb",
+                route.name === "parentHome"
+                  ? "#ea9307"
+                  : route.name === "childDetail"
+                  ? "#ea9307"
+                  : "#91cbdb",
             },
           })}
         >
@@ -87,6 +92,12 @@ export default function TabLayout() {
             name="settings"
             options={{
               href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="childDetail"
+            options={{
+              href: null, // This hides the tab from the bottom bar
             }}
           />
         </Tabs>
@@ -206,6 +217,12 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="lesson"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
+          name="childDetail"
           options={{
             href: null, // This hides the tab from the bottom bar
           }}
