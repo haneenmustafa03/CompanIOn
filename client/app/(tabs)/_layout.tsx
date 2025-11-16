@@ -15,12 +15,13 @@ export default function TabLayout() {
             tabBarInactiveTintColor: "#fff",
             headerShown: false,
             tabBarStyle: {
-              backgroundColor: "#25292e",
+              backgroundColor:
+                route.name === "parentHome" ? "#ea9307" : "#91cbdb",
             },
           })}
         >
           <Tabs.Screen
-            name="index"
+            name="parentHome"
             options={{
               title: "Home",
               tabBarIcon: ({ color, focused }) => (
@@ -33,7 +34,7 @@ export default function TabLayout() {
             }}
           />
           <Tabs.Screen
-            name="settings"
+            name="parentSettings"
             options={{
               title: "Settings",
               tabBarIcon: ({ color, focused }) => (
@@ -47,9 +48,15 @@ export default function TabLayout() {
           />
           {/* Hide tabs that parents shouldn't see */}
           <Tabs.Screen
+            name="index"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
             name="lessons"
             options={{
-              href: null, // This hides the tab from the bottom bar
+              href: null,
             }}
           />
           <Tabs.Screen
@@ -72,6 +79,12 @@ export default function TabLayout() {
           />
           <Tabs.Screen
             name="lesson"
+            options={{
+              href: null,
+            }}
+          />
+          <Tabs.Screen
+            name="settings"
             options={{
               href: null,
             }}
