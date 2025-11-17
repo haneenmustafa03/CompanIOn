@@ -1,0 +1,84 @@
+{
+  "id": "scene1",
+  "text": "Robo rolls up to the park gate and sees kids playing and birds hopping around.",
+  "choices": [
+    {
+      "label": "😊 Happy",
+      "next": "scene2A"
+    },
+    {
+      "label": "😐 Unsure",
+      "next": "scene2B"
+    },
+    {
+      "label": "😟 Overwhelmed",
+      "next": "scene2C"
+    }
+  ],
+
+  "scenes": {
+    "scene2A": {
+      "text": "Robo’s lights blink cheerfully as he zooms into the park.",
+      "choices": [
+        { "label": "😊 Happy", "next": "scene3A" },
+        { "label": "😐 Nervous", "next": "scene3B" },
+        { "label": "😟 Shy", "next": "scene3C" }
+      ]
+    },
+
+    "scene2B": {
+      "text": "Robo moves slowly into the park, looking around with soft blinking lights.",
+      "choices": [
+        { "label": "😊 Calm", "next": "scene3D" },
+        { "label": "😐 Still Unsure", "next": "scene3E" },
+        { "label": "😟 Worried", "next": "scene3F" }
+      ]
+    },
+
+    "scene2C": {
+      "text": "Robo’s lights flicker as the park feels a little too busy.",
+      "choices": [
+        { "label": "😊 Relieved", "next": "scene3G" },
+        { "label": "😐 Unsure", "next": "scene3H" },
+        { "label": "😟 Still Overwhelmed", "next": "scene3I" }
+      ]
+    },
+
+    "scene3A": {
+      "text": "Robo joins the kids on the slide and giggles in his beepy robot way.",
+      "choices": []
+    },
+    "scene3B": {
+      "text": "Robo gives a tiny wave and takes one small step toward the slide.",
+      "choices": []
+    },
+    "scene3C": {
+      "text": "Robo sits nearby and watches quietly until he feels ready.",
+      "choices": []
+    },
+    "scene3D": {
+      "text": "Robo enjoys the gentle fountain sounds and watches a butterfly float by.",
+      "choices": []
+    },
+    "scene3E": {
+      "text": "Robo sits by the flowers and takes his time looking around.",
+      "choices": []
+    },
+    "scene3F": {
+      "text": "Robo beeps softly, and a friendly kid explains the sounds of the park.",
+      "choices": []
+    },
+    "scene3G": {
+      "text": "Robo takes a slow robot breath and starts to feel better.",
+      "choices": []
+    },
+    "scene3H": {
+      "text": "Robo holds a small fidget toy the grown-up gives him.",
+      "choices": []
+    },
+    "scene3I": {
+      "text": "Robo relaxes in a quiet tent with soft lights until he feels ready.",
+      "choices": []
+    }
+  }
+}

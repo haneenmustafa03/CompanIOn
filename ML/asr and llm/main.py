@@ -192,6 +192,16 @@ if tts_engine:
 else:
     print("TTS engine failed to initialize - continuing without TTS")
 
+# Retrieve optional lesson metadata passed from Node server
+lesson_context = None
+lesson_data_env = os.environ.get("LESSON_DATA", "").strip()
+if lesson_data_env:
+    try:
+        lesson_context = json.loads(lesson_data_env)
+        print("Lesson metadata received:", lesson_context)
+    except json.JSONDecodeError as e:
+        print("Warning: Could not parse LESSON_DATA:", e)
+
 # Determine audio file to process
 if args.audio_file_flag:  # --audio-file flag used
     audio_file = args.audio_file_flag
@@ -251,9 +261,30 @@ Memory: You remember our previous conversations. Reference past topics when rele
 # Build messages with conversation history
 messages = [
     {"role": "system", "content": persona},
-    *previous_conversations,  # Include all previous conversation history
-    {"role": "user", "content": transcript},
 ]
+
+if lesson_context:
+    lesson_details = []
+    if lesson_context.get("lessonName"):
+        lesson_details.append(f"Name: {lesson_context['lessonName']}")
+    if lesson_context.get("lessonDescription"):
+        lesson_details.append(f"Description: {lesson_context['lessonDescription']}")
+    if lesson_context.get("lessonSkills"):
+        lesson_details.append(
+            "Skills: " + ", ".join(map(str, lesson_context["lessonSkills"]))
+        )
+    if lesson_context.get("lessonDifficulty"):
+        lesson_details.append(f"Difficulty: {lesson_context['lessonDifficulty']}")
+    if lesson_context.get("lessonCategory"):
+        lesson_details.append(f"Category: {lesson_context['lessonCategory']}")
+
+    lesson_context_message = "Lesson context for this conversation:\n" + "\n".join(
+        f"- {detail}" for detail in lesson_details
+    )
+    messages.append({"role": "system", "content": lesson_context_message})
+
+messages.extend(previous_conversations)  # Include all previous conversation history
+messages.append({"role": "user", "content": transcript})
 
 print(f"Sending {len(messages)} messages to LLM (including history)...")
 

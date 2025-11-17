@@ -139,7 +139,27 @@ export default function LessonScreen() {
         } as any);
       }
 
+      // Safely append lesson data if available
+      if (lesson) {
+        formData.append(
+          "lessonData",
+          JSON.stringify({
+            lessonId: lessonId,
+            lessonName: lesson.name,
+            lessonDescription: lesson.description,
+            lessonSkills: lesson.skills,
+            lessonDifficulty: lesson.difficulty,
+            lessonCategory: lesson.category,
+          })
+        );
+      } else {
+        console.warn("No lesson data available to append to formData.");
+      }
+
       console.log("🌐 Sending request to server...");
+      formData.forEach((value, key) => {
+        console.log("Key: ", key, "Value: ", value);
+      });
 
       // Send to your Express server
       const response = await fetch(

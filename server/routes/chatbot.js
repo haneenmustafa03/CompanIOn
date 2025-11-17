@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = express.Router();
+const HISTORY_FILE_PATH = path.join(__dirname, "../conversation_history.json");
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -30,6 +31,8 @@ const upload = multer({ storage: storage });
 
 // POST /api/chatbot/process-audio
 router.post("/process-audio", upload.single("audio"), async (req, res) => {
+  console.log("================================================");
+  console.log("Processing audio...");
   let uploadedFilePath = null;
   let responseSent = false;
 
@@ -40,6 +43,19 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
       res.status(statusCode).json(data);
     }
   };
+
+  const rawLessonData = req.body.lessonData;
+  let lessonData = null;
+
+  console.log("Raw lesson data: ", rawLessonData);
+  if (rawLessonData) {
+    try {
+      lessonData = JSON.parse(rawLessonData);
+      console.log("Lesson data:", lessonData);
+    } catch (err) {
+      console.warn("Invalid lessonData JSON:", rawLessonData, err);
+    }
+  }
 
   try {
     if (!req.file) {
@@ -60,6 +76,8 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
       mimetype: req.file.mimetype,
     });
 
+    console.log("Request body: ", req.body);
+
     // Path to Python script
     const pythonScriptPath = path.join(
       __dirname,
@@ -72,13 +90,22 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
     }
 
     // Run Python script
+    console.log("================================================");
+    console.log("Lesson data: ", lessonData);
     console.log("🐍 Running Python script:", pythonScriptPath);
     console.log("🐍 With audio file:", uploadedFilePath);
+    console.log("================================================");
 
-    const pythonProcess = spawn("python3", [
-      pythonScriptPath,
-      uploadedFilePath,
-    ]);
+    const pythonProcess = spawn(
+      "python3",
+      [pythonScriptPath, uploadedFilePath],
+      {
+        env: {
+          ...process.env,
+          LESSON_DATA: lessonData ? JSON.stringify(lessonData) : "",
+        },
+      }
+    );
 
     let pythonOutput = "";
     let pythonError = "";
@@ -237,6 +264,25 @@ router.post("/process-audio", upload.single("audio"), async (req, res) => {
       message: "Error processing audio",
       error: error.message,
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+    });
+  }
+});
+
+router.post("/clear-conversation-history", async (req, res) => {
+  try {
+    if (fs.existsSync(HISTORY_FILE_PATH)) {
+      await fs.promises.unlink(HISTORY_FILE_PATH);
+      console.log("🧹 Conversation history cleared");
+    } else {
+      console.log("ℹ️ No conversation history file to clear");
+    }
+    res.json({ success: true, message: "Conversation history cleared" });
+  } catch (error) {
+    console.error("❌ Failed to clear conversation history:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear conversation history",
+      error: error.message,
     });
   }
 });
