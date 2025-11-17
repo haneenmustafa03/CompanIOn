@@ -302,6 +302,33 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
   },
+  gameOverOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+  },
+  gameOverText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  gameOverSubtext: {
+    fontSize: 16,
+    color: "#fff",
+    textAlign: "center",
+    opacity: 0.9,
+  },
+  boardContainer: {
+    position: "relative",
+  },
 });
 
 export default function CheckersGame({ onGameComplete }: CheckersGameProps) {
@@ -317,25 +344,29 @@ export default function CheckersGame({ onGameComplete }: CheckersGameProps) {
     r: number;
     c: number;
   } | null>(null);
+  const [gameOver, setGameOver] = useState<"human" | "ai" | "draw" | null>(
+    null
+  );
 
   useEffect(() => {
-    if (turn === "ai") {
+    if (turn === "ai" && !gameOver) {
       // small timeout so UI updates before AI move
       const t = setTimeout(() => aiMove(), 400);
       return () => clearTimeout(t);
     }
-  }, [turn]);
+  }, [turn, gameOver]);
 
   useEffect(() => {
     const winner = checkGameOver(board);
-    if (winner) {
+    if (winner && !gameOver) {
+      setGameOver(winner);
       if (onGameComplete)
         onGameComplete(
           winner === "human" ? "human" : winner === "ai" ? "ai" : "draw"
         );
       Alert.alert("Game over", winner === "draw" ? "Draw" : `${winner} wins`);
     }
-  }, [board]);
+  }, [board, gameOver]);
 
   function resetGame() {
     setBoard(initBoard());
@@ -343,9 +374,11 @@ export default function CheckersGame({ onGameComplete }: CheckersGameProps) {
     setValidMoves([]);
     setTurn("human");
     setForcedCaptureSource(null);
+    setGameOver(null);
   }
 
   function onSelectSquare(r: number, c: number) {
+    if (gameOver) return; // Disable interactions when game is over
     const cell = board[r][c];
     if (turn !== "human") return;
 
@@ -431,6 +464,7 @@ export default function CheckersGame({ onGameComplete }: CheckersGameProps) {
 
   // AI move: prefer captures; else random move
   function aiMove() {
+    if (gameOver) return; // Don't move if game is over
     const moves = getAllMoves(board, "ai");
     if (moves.length === 0) {
       setTurn("human");
@@ -491,80 +525,104 @@ export default function CheckersGame({ onGameComplete }: CheckersGameProps) {
     setTimeout(() => setTurn("human"), 200);
   }
 
+  const getWinnerMessage = () => {
+    if (!gameOver) return "";
+    if (gameOver === "draw") return "It's a Draw!";
+    if (gameOver === "human") return "You Win! 🎉";
+    return "AI Wins! 🤖";
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>
-        {turn === "human" ? "It's Your Turn!" : "AI's Turn!"}
+        {gameOver
+          ? getWinnerMessage()
+          : turn === "human"
+          ? "It's Your Turn!"
+          : "AI's Turn!"}
       </Text>
-      <View style={styles.board}>
-        {board.map((row, r) => (
-          <View key={r} style={styles.row}>
-            {row.map((cell, c) => {
-              const dark = (r + c) % 2 === 1;
-              const isSelected =
-                selected && selected.r === r && selected.c === c;
-              const isValid = validMoves.some((m) => m.r === r && m.c === c);
-              return (
-                <TouchableOpacity
-                  key={c}
-                  onPress={() => onSelectSquare(r, c)}
-                  activeOpacity={0.8}
-                  style={[
-                    styles.square,
-                    { backgroundColor: dark ? "#8d6643" : "#efe4c6" },
-                    isSelected && styles.selected,
-                    isValid && styles.valid,
-                  ]}
-                >
-                  {cell && (
-                    <View
-                      style={[
-                        styles.piece,
-                        {
-                          backgroundColor:
-                            cell.owner === "ai" ? "#789facff" : "#f4a72a",
-                        },
-                        cell.king && styles.king,
-                      ]}
-                    >
+      <View style={styles.boardContainer}>
+        <View style={[styles.board, gameOver && { opacity: 0.5 }]}>
+          {board.map((row, r) => (
+            <View key={r} style={styles.row}>
+              {row.map((cell, c) => {
+                const dark = (r + c) % 2 === 1;
+                const isSelected =
+                  selected && selected.r === r && selected.c === c;
+                const isValid = validMoves.some((m) => m.r === r && m.c === c);
+                return (
+                  <TouchableOpacity
+                    key={c}
+                    onPress={() => onSelectSquare(r, c)}
+                    activeOpacity={gameOver ? 1 : 0.8}
+                    disabled={!!gameOver}
+                    style={[
+                      styles.square,
+                      { backgroundColor: dark ? "#8d6643" : "#efe4c6" },
+                      isSelected && styles.selected,
+                      isValid && styles.valid,
+                    ]}
+                  >
+                    {cell && (
                       <View
-                        style={{
-                          backgroundColor:
-                            cell.owner === "ai" ? "#607e87ff" : "#bd852a",
-                          width: SQUARE_SIZE * 0.65,
-                          height: SQUARE_SIZE * 0.65,
-                          borderRadius: SQUARE_SIZE * 0.325,
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
+                        style={[
+                          styles.piece,
+                          {
+                            backgroundColor:
+                              cell.owner === "ai" ? "#789facff" : "#f4a72a",
+                          },
+                          cell.king && styles.king,
+                        ]}
                       >
                         <View
                           style={{
                             backgroundColor:
-                              cell.owner === "ai" ? "#789facff" : "#f4a72a",
-                            width: SQUARE_SIZE * 0.52,
-                            height: SQUARE_SIZE * 0.52,
-                            borderRadius: SQUARE_SIZE * 0.3,
+                              cell.owner === "ai" ? "#607e87ff" : "#bd852a",
+                            width: SQUARE_SIZE * 0.65,
+                            height: SQUARE_SIZE * 0.65,
+                            borderRadius: SQUARE_SIZE * 0.325,
                             alignItems: "center",
                             justifyContent: "center",
                           }}
                         >
-                          {cell.king && <Text style={styles.kingText}>K</Text>}
+                          <View
+                            style={{
+                              backgroundColor:
+                                cell.owner === "ai" ? "#789facff" : "#f4a72a",
+                              width: SQUARE_SIZE * 0.52,
+                              height: SQUARE_SIZE * 0.52,
+                              borderRadius: SQUARE_SIZE * 0.3,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            {cell.king && (
+                              <Text style={styles.kingText}>K</Text>
+                            )}
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ))}
+        </View>
+        {gameOver && (
+          <View style={styles.gameOverOverlay}>
+            <Text style={styles.gameOverText}>{getWinnerMessage()}</Text>
+            <Text style={styles.gameOverSubtext}>
+              Press Reset to play again
+            </Text>
           </View>
-        ))}
+        )}
       </View>
 
       <View style={styles.controls}>
-        {/* <TouchableOpacity onPress={resetGame} style={styles.button}> */}
-        <Text style={styles.buttonText}>Reset</Text>
-        {/* </TouchableOpacity> */}
+        <TouchableOpacity onPress={resetGame} style={styles.button}>
+          <Text style={styles.buttonText}>Reset Game</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
