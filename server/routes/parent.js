@@ -1,165 +1,269 @@
-import express from 'express';
-import nodemailer from 'nodemailer';
-import User from '../models/User.js';
-import ChatMessage from '../models/Chat.js';
-import { authenticate, isParent } from '../middleware/auth.js';
+import express from "express";
+import nodemailer from "nodemailer";
+import User from "../models/User.js";
+import ChatMessage from "../models/Chat.js";
+import { authenticate, isParent } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Configure email transporter (using Gmail as example)
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD // Use App Password for Gmail
-  }
+    pass: process.env.EMAIL_PASSWORD, // Use App Password for Gmail
+  },
 });
 
 // Get all children for parent
-router.get('/children', authenticate, isParent, async (req, res) => {
+router.get("/children", authenticate, isParent, async (req, res) => {
   try {
-    const parent = await User.findById(req.userId).populate('children', '-password');
-    
+    // Log raw children array before populate
+    console.log(`Parent: ${req.user.email}`);
+    console.log(`Raw children array (before populate):`, req.user.children);
+    console.log(`Raw children array length: ${req.user.children?.length || 0}`);
+
+    // Check for orphaned children (children that reference this parent but aren't in children array)
+    // This can happen if there was an email mismatch during registration
+    // Use case-insensitive matching and also try with/without common typos
+    const parentEmailLower = req.user.email.toLowerCase().trim();
+
+    // Build an array of email variations to search for
+    const emailVariations = [parentEmailLower];
+
+    // Add variations with common typos (maill.com <-> mail.com)
+    if (parentEmailLower.includes("maill.com")) {
+      emailVariations.push(parentEmailLower.replace(/maill\.com/g, "mail.com"));
+    }
+    if (parentEmailLower.includes("mail.com")) {
+      emailVariations.push(parentEmailLower.replace(/mail\.com/g, "maill.com"));
+    }
+
+    console.log(
+      `Searching for orphaned children with email variations:`,
+      emailVariations
+    );
+
+    // Create both regex patterns and simple string matching for robustness
+    const emailPatterns = emailVariations.flatMap((email) => {
+      // Escape special regex characters for regex matching
+      const escaped = email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return [
+        { parentEmail: { $regex: new RegExp(`^${escaped}$`, "i") } },
+        { parentEmail: { $eq: email } }, // Simple exact match (case-sensitive)
+        { parentEmail: { $eq: email.toLowerCase() } }, // Lowercase exact match
+      ];
+    });
+
+    const orphanedChildren = await User.find({
+      accountType: "child",
+      $or: emailPatterns,
+    });
+
+    console.log(
+      `Found ${orphanedChildren.length} orphaned children. Details:`,
+      orphanedChildren.map((c) => ({
+        name: c.name,
+        email: c.email,
+        parentEmail: c.parentEmail,
+      }))
+    );
+
+    if (orphanedChildren.length > 0) {
+      console.log(
+        `Found ${orphanedChildren.length} orphaned children for ${req.user.email}`
+      );
+
+      // Add orphaned children to parent's children array if not already there
+      for (const child of orphanedChildren) {
+        const childIdStr = child._id.toString();
+        const isAlreadyLinked = req.user.children.some(
+          (existingChildId) => existingChildId.toString() === childIdStr
+        );
+
+        if (!isAlreadyLinked) {
+          req.user.children.push(child._id);
+          console.log(`Linking orphaned child: ${child.name} (${child.email})`);
+        }
+      }
+
+      // Save the updated parent document
+      await req.user.save();
+      console.log(`Updated parent's children array`);
+
+      // Refresh the user document to get the updated children array
+      await req.user.populate("children", "-password");
+    } else {
+      // req.user is already loaded by authenticate middleware
+      // Populate the children field on the existing user document
+      await req.user.populate("children", "-password");
+    }
+
+    // Log after populate
+    console.log(
+      `Children array length (after populate): ${
+        req.user.children?.length || 0
+      }`
+    );
+    console.log(`Children IDs:`, req.user.children?.map((c) => c._id) || []);
+
+    // Ensure children is an array (handle null/undefined cases)
+    const children = req.user.children || [];
+
     res.json({
       success: true,
-      children: parent.children
+      children: children,
     });
   } catch (error) {
-    console.error('Get children error:', error);
+    console.error("Get children error:", error);
     res.status(500).json({
       success: false,
-      message: 'Error fetching children'
+      message: "Error fetching children",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
 
 // Get child's progress
-router.get('/child/:childId/progress', authenticate, isParent, async (req, res) => {
-  try {
-    const { childId } = req.params;
-    
-    const hasAccess = req.user.children.some(
-      child => child.toString() === childId
-    );
-    
-    if (!hasAccess) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-    
-    const child = await User.findById(childId);
-    
-    if (!child) {
-      return res.status(404).json({
-        success: false,
-        message: 'Child not found'
-      });
-    }
-    
-    res.json({
-      success: true,
-      progress: {
-        badges: child.badges,
-        streakDays: child.streakDays,
-        gamesCompleted: child.gamesCompleted,
-        lessonsCompleted: child.lessonsCompleted,
-        lastActive: child.lastActive
+router.get(
+  "/child/:childId/progress",
+  authenticate,
+  isParent,
+  async (req, res) => {
+    try {
+      const { childId } = req.params;
+
+      const hasAccess = req.user.children.some(
+        (child) => child.toString() === childId
+      );
+
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
       }
-    });
-  } catch (error) {
-    console.error('Get progress error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching progress'
-    });
+
+      const child = await User.findById(childId);
+
+      if (!child) {
+        return res.status(404).json({
+          success: false,
+          message: "Child not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        progress: {
+          badges: child.badges,
+          streakDays: child.streakDays,
+          gamesCompleted: child.gamesCompleted,
+          lessonsCompleted: child.lessonsCompleted,
+          lastActive: child.lastActive,
+        },
+      });
+    } catch (error) {
+      console.error("Get progress error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching progress",
+      });
+    }
   }
-});
+);
 
 // Send daily email summary manually
-router.post('/send-daily-summary/:childId', authenticate, isParent, async (req, res) => {
-  try {
-    const { childId } = req.params;
-    
-    const hasAccess = req.user.children.some(
-      child => child.toString() === childId
-    );
-    
-    if (!hasAccess) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
-    
-    const child = await User.findById(childId);
-    
-    if (!child) {
-      return res.status(404).json({
-        success: false,
-        message: 'Child not found'
-      });
-    }
-    
-    // Get yesterday's messages
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    yesterday.setHours(0, 0, 0, 0);
-    
-    const endOfYesterday = new Date(yesterday);
-    endOfYesterday.setHours(23, 59, 59, 999);
-    
-    const messages = await ChatMessage.find({
-      userId: childId,
-      timestamp: {
-        $gte: yesterday,
-        $lte: endOfYesterday
+router.post(
+  "/send-daily-summary/:childId",
+  authenticate,
+  isParent,
+  async (req, res) => {
+    try {
+      const { childId } = req.params;
+
+      const hasAccess = req.user.children.some(
+        (child) => child.toString() === childId
+      );
+
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          message: "Access denied",
+        });
       }
-    }).sort({ timestamp: 1 });
-    
-    if (messages.length === 0) {
-      return res.json({
+
+      const child = await User.findById(childId);
+
+      if (!child) {
+        return res.status(404).json({
+          success: false,
+          message: "Child not found",
+        });
+      }
+
+      // Get yesterday's messages
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const endOfYesterday = new Date(yesterday);
+      endOfYesterday.setHours(23, 59, 59, 999);
+
+      const messages = await ChatMessage.find({
+        userId: childId,
+        timestamp: {
+          $gte: yesterday,
+          $lte: endOfYesterday,
+        },
+      }).sort({ timestamp: 1 });
+
+      if (messages.length === 0) {
+        return res.json({
+          success: true,
+          message: "No messages to report for yesterday",
+        });
+      }
+
+      // Generate email HTML
+      const emailHTML = generateDailySummaryEmail(child, messages, yesterday);
+
+      // Send email
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: req.user.email,
+        subject: `Daily Summary for ${
+          child.name
+        } - ${yesterday.toLocaleDateString()}`,
+        html: emailHTML,
+      });
+
+      res.json({
         success: true,
-        message: 'No messages to report for yesterday'
+        message: "Daily summary sent successfully",
+      });
+    } catch (error) {
+      console.error("Send daily summary error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error sending daily summary",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
-    
-    // Generate email HTML
-    const emailHTML = generateDailySummaryEmail(child, messages, yesterday);
-    
-    // Send email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: req.user.email,
-      subject: `Daily Summary for ${child.name} - ${yesterday.toLocaleDateString()}`,
-      html: emailHTML
-    });
-    
-    res.json({
-      success: true,
-      message: 'Daily summary sent successfully'
-    });
-  } catch (error) {
-    console.error('Send daily summary error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error sending daily summary',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
   }
-});
+);
 
 // Helper function to generate email HTML
 function generateDailySummaryEmail(child, messages, date) {
-  const flaggedMessages = messages.filter(m => m.flagged);
+  const flaggedMessages = messages.filter((m) => m.flagged);
   const sentimentCounts = {
-    positive: messages.filter(m => m.sentiment === 'positive').length,
-    neutral: messages.filter(m => m.sentiment === 'neutral').length,
-    negative: messages.filter(m => m.sentiment === 'negative').length,
-    concern: messages.filter(m => m.sentiment === 'concern').length
+    positive: messages.filter((m) => m.sentiment === "positive").length,
+    neutral: messages.filter((m) => m.sentiment === "neutral").length,
+    negative: messages.filter((m) => m.sentiment === "negative").length,
+    concern: messages.filter((m) => m.sentiment === "concern").length,
   };
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -180,42 +284,82 @@ function generateDailySummaryEmail(child, messages, date) {
       <div class="container">
         <div class="header">
           <h2>Daily Summary for ${child.name}</h2>
-          <p>${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p>${date.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}</p>
         </div>
         
         <div class="summary-box">
           <h3>Activity Summary</h3>
-          <div class="stat"><strong>Total Messages:</strong> ${messages.length}</div>
-          <div class="stat"><strong>Positive:</strong> ${sentimentCounts.positive}</div>
-          <div class="stat"><strong>Neutral:</strong> ${sentimentCounts.neutral}</div>
-          ${sentimentCounts.negative > 0 ? `<div class="stat"><strong>Negative:</strong> ${sentimentCounts.negative}</div>` : ''}
-          ${sentimentCounts.concern > 0 ? `<div class="stat" style="color: #dc3545;"><strong>⚠️ Concerns:</strong> ${sentimentCounts.concern}</div>` : ''}
+          <div class="stat"><strong>Total Messages:</strong> ${
+            messages.length
+          }</div>
+          <div class="stat"><strong>Positive:</strong> ${
+            sentimentCounts.positive
+          }</div>
+          <div class="stat"><strong>Neutral:</strong> ${
+            sentimentCounts.neutral
+          }</div>
+          ${
+            sentimentCounts.negative > 0
+              ? `<div class="stat"><strong>Negative:</strong> ${sentimentCounts.negative}</div>`
+              : ""
+          }
+          ${
+            sentimentCounts.concern > 0
+              ? `<div class="stat" style="color: #dc3545;"><strong>⚠️ Concerns:</strong> ${sentimentCounts.concern}</div>`
+              : ""
+          }
         </div>
         
-        ${flaggedMessages.length > 0 ? `
+        ${
+          flaggedMessages.length > 0
+            ? `
           <div class="concern">
             <h3>⚠️ Flagged Messages (${flaggedMessages.length})</h3>
             <p>These messages contained keywords that may need attention:</p>
-            ${flaggedMessages.map(msg => `
+            ${flaggedMessages
+              .map(
+                (msg) => `
               <div class="message">
-                <p class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</p>
+                <p class="timestamp">${new Date(
+                  msg.timestamp
+                ).toLocaleTimeString()}</p>
                 <p><strong>Child:</strong> ${msg.message}</p>
                 <p><strong>Response:</strong> ${msg.response}</p>
-                ${msg.flagReason ? `<p style="color: #dc3545;"><em>Reason: ${msg.flagReason}</em></p>` : ''}
+                ${
+                  msg.flagReason
+                    ? `<p style="color: #dc3545;"><em>Reason: ${msg.flagReason}</em></p>`
+                    : ""
+                }
               </div>
-            `).join('')}
+            `
+              )
+              .join("")}
           </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <div class="summary-box">
           <h3>Recent Conversations</h3>
-          ${messages.slice(-5).map(msg => `
+          ${messages
+            .slice(-5)
+            .map(
+              (msg) => `
             <div class="message">
-              <p class="timestamp">${new Date(msg.timestamp).toLocaleTimeString()}</p>
+              <p class="timestamp">${new Date(
+                msg.timestamp
+              ).toLocaleTimeString()}</p>
               <p><strong>Child:</strong> ${msg.message}</p>
               <p><strong>Assistant:</strong> ${msg.response}</p>
             </div>
-          `).join('')}
+          `
+            )
+            .join("")}
         </div>
         
         <div class="summary-box">

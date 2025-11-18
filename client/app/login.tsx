@@ -27,11 +27,10 @@ export default function LoginScreen() {
   useEffect(() => {
     if (!authLoading && user) {
       if (user.accountType === "parent") {
-        router.replace("/parentHome");
+        router.replace("/(tabs)/parentHome");
       } else {
         router.replace("/(tabs)");
       }
-      // r÷outer.replace("/parentHome" /* or "/childHome" based on user.accountType */);
     }
   }, [user, authLoading]);
 

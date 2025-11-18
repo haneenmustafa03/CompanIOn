@@ -13,7 +13,7 @@ import chatbotRoutes from './routes/chatbot.js';
 import gameRoutes from './routes/games.js';
 import lessonRoutes from './routes/lessons.js';
 
-//import parentRoutes from './routes/parent.js';
+import parentRoutes from './routes/parent.js';
 //import settingsRoutes from './routes/settings.js';
 
 
@@ -72,7 +72,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/lessons', lessonRoutes);
 app.use('/api/games', gameRoutes);
 app.use('/api/chatbot', chatbotRoutes);
-//app.use('/api/parent', parentRoutes);
+app.use('/api/parent', parentRoutes);
 //app.use('/api/settings', settingsRoutes);
 
 

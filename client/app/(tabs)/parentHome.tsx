@@ -12,9 +12,11 @@ import { useAuth } from "../../contexts/AuthContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import SmallRobot from "@/components/smallRobot";
 import SmallRobotHead from "@/components/smallRobotHead";
+import { useEffect, useState } from "react";
 
 export default function ParentHomeScreen() {
   const router = useRouter();
+  const { token } = useAuth();
 
   const handleChildPress = (childId: string, childName: string) => {
     router.push({
@@ -26,6 +28,43 @@ export default function ParentHomeScreen() {
       },
     });
   };
+
+  const [children, setChildren] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchChildren = async () => {
+      if (!token) {
+        console.log("No token available");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "http://localhost:5001/api/parent/children",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setChildren(data.children);
+        }
+      } catch (error) {
+        console.error("Error fetching children:", error);
+      }
+    };
+    fetchChildren();
+  }, [token]);
+
+  console.log("children", children);
 
   return (
     <ImageBackground
@@ -42,51 +81,34 @@ export default function ParentHomeScreen() {
         <View style={styles.scrollerWrapper}>
           <Text style={styles.sectionTitle}>Your Children: </Text>
           <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-            {/* Render child profiles here */}
-            <TouchableOpacity
-              style={{
-                width: 150,
-                height: 200,
-                backgroundColor: "rgba(179, 141, 28, 0.3)",
-                borderRadius: 12,
-                marginRight: 16,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => handleChildPress("olivia-001", "Olivia")}
-            >
-              {/* <Ionicons name="person-circle" size={80} color="white" /> */}
-              {/* <Image source={require('@/assets')}/> */}
-              <View style={{ marginBottom: 20 }}>
-                <SmallRobotHead color="#d6b3d6ff" />
-              </View>
-              <Text style={{ fontSize: 24, color: "white", marginTop: 8 }}>
-                Olivia
+            {children.length > 0 ? (
+              children.map((child: any) => (
+                <TouchableOpacity
+                  key={child._id}
+                  style={{
+                    width: 150,
+                    height: 200,
+                    backgroundColor: "rgba(179, 141, 28, 0.3)",
+                    borderRadius: 12,
+                    marginRight: 16,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => handleChildPress(child._id, child.name)}
+                >
+                  <View style={{ marginBottom: 20 }}>
+                    <SmallRobotHead color="lightblue" />
+                  </View>
+                  <Text style={{ fontSize: 24, color: "white", marginTop: 8 }}>
+                    {child.name}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={{ color: "white", fontSize: 16, padding: 20 }}>
+                No children found
               </Text>
-            </TouchableOpacity>
-            {/* </ScrollView> */}
-
-            <TouchableOpacity
-              style={{
-                width: 150,
-                height: 200,
-                backgroundColor: "rgba(179, 141, 28, 0.3)",
-                borderRadius: 12,
-                marginRight: 16,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => handleChildPress("olivia-001", "Olivia")}
-            >
-              {/* <Ionicons name="person-circle" size={80} color="white" /> */}
-              {/* <Image source={require('@/assets')}/> */}
-              <View style={{ marginBottom: 20 }}>
-                <SmallRobotHead color="#b3d6d6ff" />
-              </View>
-              <Text style={{ fontSize: 24, color: "white", marginTop: 8 }}>
-                Eddy
-              </Text>
-            </TouchableOpacity>
+            )}
           </ScrollView>
         </View>
       </View>

@@ -97,7 +97,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await AsyncStorage.setItem("authToken", data.token);
         setToken(data.token);
         setUser(data.user);
-        router.replace("/settings");
+
+        // Redirect based on account type
+        if (data.user.accountType === "parent") {
+          router.replace("/(tabs)/parentHome");
+        } else {
+          router.replace("/(tabs)");
+        }
       } else {
         throw new Error(data.message || "Login failed");
       }
