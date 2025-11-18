@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Image,
   ImageBackground,
   ScrollView,
   StyleSheet,
@@ -86,6 +87,15 @@ export default function GamesScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getGameIcon = (gameId: string) => {
+    const iconMap: Record<string, any> = {
+      checkers: require("../../assets/gameIcons/checkers.png"),
+      matching: require("../../assets/gameIcons/matching.png"),
+      storyteller: require("../../assets/gameIcons/storytelling.png"),
+    };
+    return iconMap[gameId] || null;
   };
 
   const handleGamePress = (game: Game) => {
@@ -173,6 +183,13 @@ export default function GamesScreen() {
               onPress={() => handleGamePress(game)}
               activeOpacity={0.7}
             >
+              {getGameIcon(game.id) && (
+                <Image
+                  source={getGameIcon(game.id)}
+                  style={styles.gameIcon}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.gameName}>{game.name}</Text>
               <Text style={styles.gameDifficulty}>{game.difficulty}</Text>
               <Text style={styles.gameDescription} numberOfLines={2}>
@@ -196,14 +213,20 @@ export default function GamesScreen() {
 const styles = StyleSheet.create({
   card: {
     width: 160,
-    height: 140,
+    height: 160,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
     padding: 8,
     marginRight: 8,
     marginLeft: 4,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+  },
+  gameIcon: {
+    width: 50,
+    height: 50,
+    marginBottom: 6,
   },
   container: {
     flex: 1,
@@ -261,14 +284,14 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   skillTag: {
-    color: "#87CEEB",
-    fontSize: 8,
-    backgroundColor: "rgba(135, 206, 235, 0.2)",
-    paddingHorizontal: 4,
-    paddingVertical: 1,
+    color: "rgb(255, 255, 255)",
+    fontSize: 9,
+    backgroundColor: "rgb(88, 113, 92)",
+    paddingHorizontal: 5,
+    paddingVertical: 3,
     borderRadius: 4,
     marginRight: 2,
-    marginBottom: 2,
+    marginBottom: 5,
   },
   loadingContainer: {
     alignItems: "center",

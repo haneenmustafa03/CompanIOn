@@ -97,7 +97,34 @@ export default function ChildDetailScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.settingsButton}>
+        <TouchableOpacity
+          style={styles.convoHistoryButton}
+          onPress={() =>
+            router.push({
+              pathname: "/childConvoHistory",
+              params: {
+                childId: childId as string,
+                childName: childName as string,
+              },
+            })
+          }
+        >
+          <Ionicons name="chatbubbles" size={20} color="white" />
+          <Text style={styles.settingsButtonText}>Conversation History</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() =>
+            router.push({
+              pathname: "/settings",
+              params: {
+                childId: childId as string,
+                childName: childName as string,
+              },
+            })
+          }
+        >
           <Ionicons name="cog" size={20} color="white" />
           <Text style={styles.settingsButtonText}>Parental Controls</Text>
         </TouchableOpacity>
@@ -199,8 +226,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
   },
-  settingsButton: {
+  convoHistoryButton: {
     backgroundColor: "#2D62A6",
+    borderRadius: 12,
+    paddingVertical: 14,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 24,
+  },
+  settingsButton: {
+    backgroundColor: "red",
     borderRadius: 12,
     paddingVertical: 14,
     flexDirection: "row",

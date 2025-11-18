@@ -21,6 +21,8 @@ export default function TabLayout() {
                   ? "#ea9307"
                   : route.name === "childDetail"
                   ? "#ea9307"
+                  : route.name === "childConvoHistory"
+                  ? "#ea9307"
                   : "#91cbdb",
             },
           })}
@@ -96,6 +98,12 @@ export default function TabLayout() {
           />
           <Tabs.Screen
             name="childDetail"
+            options={{
+              href: null, // This hides the tab from the bottom bar
+            }}
+          />
+          <Tabs.Screen
+            name="childConvoHistory"
             options={{
               href: null, // This hides the tab from the bottom bar
             }}
@@ -223,6 +231,12 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="childDetail"
+          options={{
+            href: null, // This hides the tab from the bottom bar
+          }}
+        />
+        <Tabs.Screen
+          name="childConvoHistory"
           options={{
             href: null, // This hides the tab from the bottom bar
           }}

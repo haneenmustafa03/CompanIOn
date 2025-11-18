@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface MatchingGameProps {
@@ -41,14 +41,54 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
   const [flippedCount, setFlippedCount] = useState(0);
   const [matches, setMatches] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  const [time, setTime] = useState(0);
+  const [isGameComplete, setIsGameComplete] = useState(false);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Timer effect
+  useEffect(() => {
+    if (isTimerRunning) {
+      timerIntervalRef.current = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } else {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+        timerIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [isTimerRunning]);
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const flipCard = (id: number) => {
     console.log("Flipping card", id);
 
+    // Start timer on first card flip
+    if (!isTimerRunning && flippedCount === 0) {
+      setIsTimerRunning(true);
+    }
+
     // Find the card being flipped
     const cardToFlip = cards.find((card) => card.id === id);
-    if (!cardToFlip || cardToFlip.isFlipped || cardToFlip.isMatched) {
-      return; // Don't flip if already flipped or matched
+    if (
+      !cardToFlip ||
+      cardToFlip.isFlipped ||
+      cardToFlip.isMatched ||
+      isGameComplete
+    ) {
+      return; // Don't flip if already flipped, matched, or game is complete
     }
 
     // If this is the first card being flipped
@@ -111,6 +151,8 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
       if (matches + 1 === 3) {
         // 3 pairs total
         console.log("Game completed!");
+        setIsGameComplete(true);
+        setIsTimerRunning(false);
         if (onGameComplete) {
           onGameComplete(attempts);
         }
@@ -167,6 +209,9 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
     setFlippedCount(0);
     setMatches(0);
     setAttempts(0);
+    setTime(0);
+    setIsGameComplete(false);
+    setIsTimerRunning(false);
     setCurrentlyFlippedCards({
       id1: 0,
       shape1: "",
@@ -182,26 +227,50 @@ export default function MatchingGame({ onGameComplete }: MatchingGameProps) {
       <View style={styles.statsContainer}>
         <Text style={styles.statText}>Matches: {matches}/3</Text>
         <Text style={styles.statText}>Attempts: {attempts}</Text>
+        <Text style={styles.statText}>Time: {formatTime(time)}</Text>
       </View>
 
-      <View style={styles.gameContainer}>
-        {cards.map((card) => (
+      {isGameComplete && (
+        <View style={styles.gameCompletedContainer}>
+          <Text style={styles.gameCompletedText}>Game Completed!</Text>
+          <Text style={styles.gameCompletedText}>
+            Score: {attempts} attempts
+          </Text>
+          <Text style={styles.gameCompletedText}>Time: {formatTime(time)}</Text>
           <TouchableOpacity
-            key={card.id}
-            onPress={() => flipCard(card.id)}
-            style={[styles.cardContainer, card.isMatched && styles.matchedCard]}
+            style={styles.gameCompletedButton}
+            onPress={() => resetGame()}
           >
-            <Image source={getCardImage(card)} style={styles.image} />
-            <Text style={styles.cardId}>{card.id}</Text>
+            <Text style={styles.gameCompletedButtonText}>Play Again</Text>
           </TouchableOpacity>
-        ))}
-      </View>
+        </View>
+      )}
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => resetGame()}>
-          <Text style={styles.buttonText}>Reset Game</Text>
-        </TouchableOpacity>
-      </View>
+      {!isGameComplete && (
+        <>
+          <View style={styles.gameContainer}>
+            {cards.map((card) => (
+              <TouchableOpacity
+                key={card.id}
+                onPress={() => flipCard(card.id)}
+                style={[
+                  styles.cardContainer,
+                  card.isMatched && styles.matchedCard,
+                ]}
+              >
+                <Image source={getCardImage(card)} style={styles.image} />
+                <Text style={styles.cardId}>{card.id}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={() => resetGame()}>
+              <Text style={styles.buttonText}>Reset Game</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -274,5 +343,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "Poppins-SemiBold",
     color: "#fff",
+  },
+  gameCompletedContainer: {
+    backgroundColor: "rgba(93, 159, 78, 0.9)",
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#5d9f4e",
+  },
+  gameCompletedText: {
+    fontSize: 18,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  gameCompletedButton: {
+    backgroundColor: "#302638",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    minWidth: 120,
+  },
+  gameCompletedButtonText: {
+    fontSize: 16,
+    fontFamily: "Poppins-SemiBold",
+    color: "#fff",
+    textAlign: "center",
   },
 });

@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import SmallRobot from "../../components/smallRobot";
+import SmallRobotHead from "@/components/smallRobotHead";
 
 const API_BASE_URL = "http://localhost:5001/api";
 
@@ -269,7 +270,7 @@ export default function LessonScreen() {
       <ImageBackground
         source={require("../../assets/backgroundImages/Lesson.png")}
         style={styles.container}
-        resizeMode="stretch"
+        resizeMode="cover"
       >
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#5d9f4e" />
@@ -284,7 +285,7 @@ export default function LessonScreen() {
       <ImageBackground
         source={require("../../assets/backgroundImages/Lesson.png")}
         style={styles.container}
-        resizeMode="stretch"
+        resizeMode="cover"
       >
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>⚠️ {error || "Lesson not found"}</Text>
@@ -297,7 +298,7 @@ export default function LessonScreen() {
     <ImageBackground
       source={require("../../assets/backgroundImages/Lesson.png")}
       style={styles.container}
-      resizeMode="stretch"
+      resizeMode="cover"
     >
       <View style={styles.lessonContainer}>
         <Text style={styles.lessonTitle}>{lesson.name}</Text>
@@ -314,7 +315,8 @@ export default function LessonScreen() {
         <Text style={styles.lessonCategory}>Category: {lesson.category}</Text>
       </View>
       <View style={styles.robotWrapper}>
-        <SmallRobot size={1.7} />
+        <SmallRobot size={1.7} color="lightblue" />
+        {/* <SmallRobotHead size={1.7} color="#5d9f4e" /> */}
       </View>
 
       <View style={styles.buttonWrapper}>
@@ -340,6 +342,8 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   lessonContainer: {
     position: "absolute",

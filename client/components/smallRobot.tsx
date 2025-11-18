@@ -5,9 +5,13 @@ const { width, height } = Dimensions.get("window");
 
 interface SmallRobotProps {
   size?: "small" | "medium" | "large" | number; // number for custom scale factor
+  color?: string;
 }
 
-export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
+export default function SmallRobot({
+  size = "medium",
+  color = "#ffffff",
+}: SmallRobotProps) {
   const floatAnim = useRef(new Animated.Value(0)).current;
   const blinkAnim = useRef(new Animated.Value(1)).current;
   const waveLeftAnim = useRef(new Animated.Value(0)).current;
@@ -129,7 +133,7 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
     head: {
       width: 90 * scaleFactor,
       height: 70 * scaleFactor,
-      backgroundColor: "#ffffff",
+      backgroundColor: color,
       borderTopLeftRadius: 45 * scaleFactor,
       borderTopRightRadius: 45 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
@@ -164,7 +168,7 @@ export default function SmallRobot({ size = "medium" }: SmallRobotProps) {
     body: {
       width: 80 * scaleFactor,
       height: 65 * scaleFactor,
-      backgroundColor: "white",
+      backgroundColor: color === "#ffffff" ? "white" : color,
       borderTopLeftRadius: 20 * scaleFactor,
       borderTopRightRadius: 20 * scaleFactor,
       borderBottomLeftRadius: 30 * scaleFactor,
